@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ThreatIntel - Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-fixed-dim": "#adc6ff",
+                        "primary-fixed": "#74f5ff",
+                        "surface-container-lowest": "#0d0e13",
+                        "on-surface": "#e3e1e9",
+                        "outline-variant": "#3a494b",
+                        "secondary": "#adc6ff",
+                        "on-secondary-container": "#e6ecff",
+                        "tertiary-fixed": "#e9ddff",
+                        "secondary-fixed": "#d8e2ff",
+                        "on-secondary-fixed": "#001a42",
+                        "on-primary": "#00363a",
+                        "on-error": "#690005",
+                        "on-tertiary-fixed": "#23005c",
+                        "on-secondary-fixed-variant": "#004395",
+                        "tertiary-container": "#e2d4ff",
+                        "on-secondary": "#002e6a",
+                        "primary-container": "#00f2ff",
+                        "on-primary-fixed-variant": "#004f54",
+                        "on-tertiary-container": "#6f3cd8",
+                        "surface": "#121318",
+                        "error-container": "#93000a",
+                        "inverse-primary": "#00696f",
+                        "primary-fixed-dim": "#00dbe7",
+                        "on-surface-variant": "#b9cacb",
+                        "on-background": "#e3e1e9",
+                        "on-tertiary": "#3c0091",
+                        "error": "#ffb4ab",
+                        "secondary-container": "#0566d9",
+                        "on-primary-container": "#006a71",
+                        "surface-bright": "#38393f",
+                        "surface-container-highest": "#34343a",
+                        "surface-variant": "#34343a",
+                        "outline": "#849495",
+                        "inverse-surface": "#e3e1e9",
+                        "tertiary": "#fcf5ff",
+                        "surface-dim": "#121318",
+                        "tertiary-fixed-dim": "#d0bcff",
+                        "surface-container": "#1e1f25",
+                        "background": "#121318",
+                        "surface-container-high": "#292a2f",
+                        "on-primary-fixed": "#002022",
+                        "on-tertiary-fixed-variant": "#5516be",
+                        "surface-tint": "#00dbe7",
+                        "on-error-container": "#ffdad6",
+                        "inverse-on-surface": "#2f3036",
+                        "surface-container-low": "#1a1b21",
+                        "primary": "#e1fdff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "container-padding": "24px",
+                        "unit": "4px",
+                        "gutter": "16px",
+                        "stack-sm": "8px",
+                        "stack-md": "16px",
+                        "stack-lg": "32px"
+                    },
+                    "fontFamily": {
+                        "label-caps": ["JetBrains Mono"],
+                        "data-mono": ["JetBrains Mono"],
+                        "display-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "body-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "label-caps": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700" }],
+                        "data-mono": ["14px", { "lineHeight": "20px", "fontWeight": "500" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body { background-color: #050507; }
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.4);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .glass-panel:hover {
+            border-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 0 15px rgba(116, 245, 255, 0.05);
+        }
+        .data-table-row {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .data-table-row:nth-child(even) {
+            background-color: rgba(255, 255, 255, 0.02);
+        }
+        .status-badge {
+            border: 1px solid;
+            background-color: rgba(0, 0, 0, 0); /* Placeholder, updated via inline style */
+        }
+        
+        /* Side Nav Active State Injection from JSON */
+        .side-nav-active {
+            color: #74f5ff !important;
+            font-weight: 700 !important;
+            border-left-width: 2px !important;
+            border-left-color: #74f5ff !important;
+            background-color: rgba(225, 253, 255, 0.1) !important;
+        }
+    </style>
+</head>
+<body class="text-on-surface font-body-md overflow-x-hidden">
+<!-- TopNavBar -->
+<nav class="fixed top-0 right-0 left-64 flex justify-between items-center px-gutter h-16 z-40 bg-surface-container-lowest/30 backdrop-blur-md border-b border-outline-variant/20 hidden md:flex">
+<div class="flex items-center gap-4">
+<span class="font-headline-md text-headline-md font-black text-primary-fixed">ThreatIntel</span>
+<div class="relative ml-8 flex items-center bg-surface-container/50 rounded-full px-4 py-1.5 border border-outline-variant/30 focus-within:border-primary-fixed focus-within:shadow-[0_0_8px_rgba(116,245,255,0.2)] transition-all">
+<span class="material-symbols-outlined text-on-surface-variant text-[20px] mr-2" data-icon="search">search</span>
+<input class="bg-transparent border-none text-data-mono font-data-mono text-on-surface focus:ring-0 placeholder:text-on-surface-variant/50 w-64 p-0" placeholder="Search IOCs, Feeds..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-4">
+<button class="text-on-surface-variant hover:text-primary-container transition-opacity"><span class="material-symbols-outlined" data-icon="notifications">notifications</span></button>
+<button class="text-on-surface-variant hover:text-primary-container transition-opacity"><span class="material-symbols-outlined" data-icon="dark_mode">dark_mode</span></button>
+<button class="text-on-surface-variant hover:text-primary-container transition-opacity"><span class="material-symbols-outlined" data-icon="schedule">schedule</span></button>
+</div>
+<div class="h-6 w-px bg-outline-variant/40"></div>
+<button class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary-container transition-opacity uppercase tracking-wider">Settings</button>
+<div class="h-8 w-8 rounded-full bg-surface-container-high border border-outline-variant overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Close up profile picture of a specialized SOC analyst in a dark control room setting with cyan screen glow reflecting on their face, highly detailed, realistic, cinematic lighting, modern cyber security professional." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCXJeSE1LFyfh1jAZQA3qiZWUztrmZfXXXSooaZ11D3jwdMHyi6hjn0Y8WXFADVgiBqW6I4HtUM9v3E7K4nitYwlz_zGrbghzipzeQBBDCIo1RqPyxeH9oH6Jgj46Bq3N9OSBQIBikQED3CS-a82uuLy6uUGKtUc2yFr8sl_qG6_R0hpSrb9HZivn6s_sD8PIvxzuzB9WSyk5pTzZ-ZUMZGFpuokPETvsGQre4LtKAUOMe_C14n8vIMuQ"/>
+</div>
+</div>
+</nav>
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-0 h-full flex flex-col z-50 bg-surface-container-low/40 backdrop-blur-xl docked left-0 h-screen w-64 border-r border-outline-variant/20 shadow-2xl transition-all duration-300 ease-in-out hidden md:flex">
+<div class="p-6 pb-2 border-b border-outline-variant/20">
+<div class="flex items-center gap-3 mb-6">
+<div class="h-10 w-10 rounded bg-primary-fixed/20 border border-primary-fixed/50 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary-fixed" data-icon="shield">shield</span>
+</div>
+<div>
+<h1 class="font-display-lg text-[24px] font-bold text-primary-fixed tracking-tighter leading-tight">TIA</h1>
+<p class="font-label-caps text-[10px] text-on-surface-variant uppercase tracking-widest">Threat Intelligence</p>
+</div>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto py-4 flex flex-col gap-1 px-3">
+<!-- Active Tab -->
+<a class="flex items-center gap-3 px-4 py-2.5 rounded-r side-nav-active" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-label-caps text-[13px] tracking-wide">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2.5 rounded-r text-on-surface-variant font-medium hover:bg-surface-container-highest/50 hover:text-primary-fixed transition-colors border-l-2 border-transparent" href="#">
+<span class="material-symbols-outlined" data-icon="rss_feed">rss_feed</span>
+<span class="font-label-caps text-[13px] tracking-wide">Feed Management</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2.5 rounded-r text-on-surface-variant font-medium hover:bg-surface-container-highest/50 hover:text-primary-fixed transition-colors border-l-2 border-transparent" href="#">
+<span class="material-symbols-outlined" data-icon="search_check">search_check</span>
+<span class="font-label-caps text-[13px] tracking-wide">IOC Explorer</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2.5 rounded-r text-on-surface-variant font-medium hover:bg-surface-container-highest/50 hover:text-primary-fixed transition-colors border-l-2 border-transparent" href="#">
+<span class="material-symbols-outlined" data-icon="hub">hub</span>
+<span class="font-label-caps text-[13px] tracking-wide">Correlation</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2.5 rounded-r text-on-surface-variant font-medium hover:bg-surface-container-highest/50 hover:text-primary-fixed transition-colors border-l-2 border-transparent" href="#">
+<span class="material-symbols-outlined" data-icon="block">block</span>
+<span class="font-label-caps text-[13px] tracking-wide">Blocklists</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2.5 rounded-r text-on-surface-variant font-medium hover:bg-surface-container-highest/50 hover:text-primary-fixed transition-colors border-l-2 border-transparent" href="#">
+<span class="material-symbols-outlined" data-icon="assessment">assessment</span>
+<span class="font-label-caps text-[13px] tracking-wide">Reports</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2.5 rounded-r text-on-surface-variant font-medium hover:bg-surface-container-highest/50 hover:text-primary-fixed transition-colors border-l-2 border-transparent" href="#">
+<span class="material-symbols-outlined" data-icon="history">history</span>
+<span class="font-label-caps text-[13px] tracking-wide">Activity Logs</span>
+</a>
+<div class="mt-auto flex flex-col gap-1 border-t border-outline-variant/20 pt-4">
+<a class="flex items-center gap-3 px-4 py-2.5 rounded-r text-on-surface-variant font-medium hover:bg-surface-container-highest/50 hover:text-primary-fixed transition-colors border-l-2 border-transparent" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-label-caps text-[13px] tracking-wide">Settings</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2.5 rounded-r text-on-surface-variant font-medium hover:bg-surface-container-highest/50 hover:text-primary-fixed transition-colors border-l-2 border-transparent" href="#">
+<span class="material-symbols-outlined" data-icon="info">info</span>
+<span class="font-label-caps text-[13px] tracking-wide">About</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2.5 rounded-r text-error font-medium hover:bg-error-container/20 transition-colors border-l-2 border-transparent" href="#">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+<span class="font-label-caps text-[13px] tracking-wide">Logout</span>
+</a>
+</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="md:ml-64 mt-16 p-container-padding min-h-screen">
+<!-- Header Section -->
+<div class="mb-stack-lg flex justify-between items-end">
+<div>
+<h2 class="font-headline-lg text-headline-lg text-primary-fixed">Overview</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Real-time threat intelligence telemetry</p>
+</div>
+<div class="flex gap-4">
+<button class="glass-panel px-4 py-2 rounded-DEFAULT font-label-caps text-label-caps text-primary-fixed flex items-center gap-2 hover:bg-surface-container/50 transition-all">
+<span class="material-symbols-outlined text-[16px]" data-icon="refresh">refresh</span>
+                    REFRESH DATA
+                </button>
+<button class="bg-gradient-to-r from-primary-fixed to-primary-fixed-dim text-on-primary-fixed font-label-caps text-label-caps px-6 py-2 rounded-DEFAULT font-bold flex items-center gap-2 hover:shadow-[0_0_15px_rgba(116,245,255,0.4)] transition-all">
+<span class="material-symbols-outlined text-[16px]" data-icon="add">add</span>
+                    NEW FEED
+                </button>
+</div>
+</div>
+<!-- KPI Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-gutter mb-stack-lg">
+<!-- KPI 1 -->
+<div class="glass-panel p-4 rounded-lg flex flex-col justify-between h-28 border-l-[3px] border-l-secondary-fixed">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider">Total Feeds</span>
+<div class="flex justify-between items-end">
+<span class="font-data-mono text-[32px] font-bold text-on-surface leading-none">124</span>
+<span class="material-symbols-outlined text-secondary-fixed opacity-50" data-icon="dns">dns</span>
+</div>
+</div>
+<!-- KPI 2 -->
+<div class="glass-panel p-4 rounded-lg flex flex-col justify-between h-28 border-l-[3px] border-l-primary-fixed">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider">Feeds Processed</span>
+<div class="flex justify-between items-end">
+<span class="font-data-mono text-[32px] font-bold text-on-surface leading-none">1,842</span>
+<span class="material-symbols-outlined text-primary-fixed opacity-50" data-icon="sync_alt">sync_alt</span>
+</div>
+</div>
+<!-- KPI 3 -->
+<div class="glass-panel p-4 rounded-lg flex flex-col justify-between h-28 border-l-[3px] border-l-tertiary-fixed">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider">Total IOCs</span>
+<div class="flex justify-between items-end">
+<span class="font-data-mono text-[32px] font-bold text-on-surface leading-none">4.2M</span>
+<span class="material-symbols-outlined text-tertiary-fixed opacity-50" data-icon="database">database</span>
+</div>
+</div>
+<!-- KPI 4 -->
+<div class="glass-panel p-4 rounded-lg flex flex-col justify-between h-28 border-l-[3px] border-l-primary-fixed">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider">Unique IOCs</span>
+<div class="flex justify-between items-end">
+<span class="font-data-mono text-[32px] font-bold text-on-surface leading-none">892K</span>
+<span class="material-symbols-outlined text-primary-fixed opacity-50" data-icon="fingerprint">fingerprint</span>
+</div>
+</div>
+<!-- KPI 5 -->
+<div class="glass-panel p-4 rounded-lg flex flex-col justify-between h-28 border-l-[3px] border-l-error">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider">High Risk IOCs</span>
+<div class="flex justify-between items-end">
+<span class="font-data-mono text-[32px] font-bold text-error leading-none">14,302</span>
+<span class="material-symbols-outlined text-error opacity-50" data-icon="warning">warning</span>
+</div>
+</div>
+<!-- KPI 6 -->
+<div class="glass-panel p-4 rounded-lg flex flex-col justify-between h-28 border-l-[3px] border-l-secondary-fixed">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider">Correlated IOCs</span>
+<div class="flex justify-between items-end">
+<span class="font-data-mono text-[32px] font-bold text-on-surface leading-none">5,210</span>
+<span class="material-symbols-outlined text-secondary-fixed opacity-50" data-icon="hub">hub</span>
+</div>
+</div>
+<!-- KPI 7 -->
+<div class="glass-panel p-4 rounded-lg flex flex-col justify-between h-28 border-l-[3px] border-l-tertiary-fixed-dim">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider">Blocklisted IOCs</span>
+<div class="flex justify-between items-end">
+<span class="font-data-mono text-[32px] font-bold text-on-surface leading-none">89,102</span>
+<span class="material-symbols-outlined text-tertiary-fixed-dim opacity-50" data-icon="block">block</span>
+</div>
+</div>
+<!-- KPI 8 -->
+<div class="glass-panel p-4 rounded-lg flex flex-col justify-between h-28 border-l-[3px] border-l-outline">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider">Last Feed Update</span>
+<div class="flex justify-between items-end">
+<span class="font-data-mono text-[24px] font-bold text-on-surface leading-none">2m ago</span>
+<span class="material-symbols-outlined text-outline opacity-50" data-icon="update">update</span>
+</div>
+</div>
+</div>
+<!-- Middle Section: Charts -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-gutter mb-stack-lg">
+<!-- Chart 1: IOC Distribution -->
+<div class="glass-panel rounded-lg p-6 flex flex-col">
+<div class="flex justify-between items-center mb-6 pb-2 border-b border-outline-variant/30">
+<h3 class="font-label-caps text-label-caps text-on-surface uppercase tracking-wider">IOC Distribution by Type</h3>
+<span class="material-symbols-outlined text-on-surface-variant text-[18px]" data-icon="pie_chart">pie_chart</span>
+</div>
+<div class="flex-1 flex items-center justify-center min-h-[250px] relative">
+<!-- Placeholder for Donut Chart -->
+<div class="w-48 h-48 rounded-full border-[16px] border-surface-container relative flex items-center justify-center" style="border-top-color: #74f5ff; border-right-color: #adc6ff; border-bottom-color: #e9ddff; border-left-color: #3a494b;">
+<div class="text-center">
+<span class="block font-data-mono text-[24px] font-bold">892K</span>
+<span class="block font-label-caps text-[10px] text-on-surface-variant">TOTAL</span>
+</div>
+</div>
+<!-- Legend -->
+<div class="absolute right-0 top-1/2 -translate-y-1/2 flex flex-col gap-3">
+<div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-primary-fixed"></div><span class="font-data-mono text-[12px] text-on-surface-variant">IP (45%)</span></div>
+<div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-secondary-fixed"></div><span class="font-data-mono text-[12px] text-on-surface-variant">Domain (30%)</span></div>
+<div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-tertiary-fixed"></div><span class="font-data-mono text-[12px] text-on-surface-variant">URL (15%)</span></div>
+<div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-outline"></div><span class="font-data-mono text-[12px] text-on-surface-variant">Hash (10%)</span></div>
+</div>
+</div>
+</div>
+<!-- Chart 2: Severity -->
+<div class="glass-panel rounded-lg p-6 flex flex-col">
+<div class="flex justify-between items-center mb-6 pb-2 border-b border-outline-variant/30">
+<h3 class="font-label-caps text-label-caps text-on-surface uppercase tracking-wider">IOC Severity Distribution</h3>
+<span class="material-symbols-outlined text-on-surface-variant text-[18px]" data-icon="bar_chart">bar_chart</span>
+</div>
+<div class="flex-1 flex flex-col justify-end gap-4 min-h-[250px] pt-4">
+<!-- Bar Chart Placeholder -->
+<div class="flex items-end h-full gap-2 w-full justify-around pb-6 relative border-b border-outline-variant/30">
+<!-- Y-axis labels -->
+<div class="absolute left-0 top-0 bottom-6 flex flex-col justify-between text-on-surface-variant font-data-mono text-[10px]">
+<span>100k</span><span>75k</span><span>50k</span><span>25k</span>
+</div>
+<div class="flex flex-col items-center gap-2 w-16 z-10 ml-6">
+<div class="w-full bg-error/80 h-[20%] rounded-t-sm border border-error/50 shadow-[0_0_10px_rgba(255,180,171,0.2)]"></div>
+<span class="font-label-caps text-[10px] text-on-surface-variant">CRITICAL</span>
+</div>
+<div class="flex flex-col items-center gap-2 w-16 z-10">
+<div class="w-full bg-[#ffb4ab]/60 h-[45%] rounded-t-sm border border-[#ffb4ab]/50"></div>
+<span class="font-label-caps text-[10px] text-on-surface-variant">HIGH</span>
+</div>
+<div class="flex flex-col items-center gap-2 w-16 z-10">
+<div class="w-full bg-secondary-fixed/60 h-[75%] rounded-t-sm border border-secondary-fixed/50"></div>
+<span class="font-label-caps text-[10px] text-on-surface-variant">MEDIUM</span>
+</div>
+<div class="flex flex-col items-center gap-2 w-16 z-10">
+<div class="w-full bg-outline/40 h-[30%] rounded-t-sm border border-outline/50"></div>
+<span class="font-label-caps text-[10px] text-on-surface-variant">LOW</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Bottom Section: Tables Grid -->
+<div class="grid grid-cols-1 xl:grid-cols-3 gap-gutter">
+<!-- Threat Activity Live Panel -->
+<div class="glass-panel rounded-lg flex flex-col xl:col-span-2 overflow-hidden">
+<div class="flex justify-between items-center p-4 border-b border-outline-variant/30 bg-surface-container-low/50">
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-primary-fixed animate-pulse"></div>
+<h3 class="font-label-caps text-label-caps text-on-surface uppercase tracking-wider">Live Threat Activity</h3>
+</div>
+<button class="text-primary-fixed text-sm hover:underline font-label-caps text-[10px]">VIEW ALL</button>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="font-label-caps text-[11px] text-on-surface-variant bg-surface-container/30 border-b border-outline-variant/30">
+<th class="p-3 font-normal">TIMESTAMP</th>
+<th class="p-3 font-normal">INDICATOR</th>
+<th class="p-3 font-normal">TYPE</th>
+<th class="p-3 font-normal">SOURCE</th>
+<th class="p-3 font-normal">SEVERITY</th>
+</tr>
+</thead>
+<tbody class="font-data-mono text-[13px]">
+<tr class="data-table-row hover:bg-surface-container/40 transition-colors cursor-pointer">
+<td class="p-3 text-on-surface-variant">10:42:01.05</td>
+<td class="p-3 text-primary-fixed">185.192.x.x</td>
+<td class="p-3">IPv4</td>
+<td class="p-3">AlienVault OTX</td>
+<td class="p-3">
+<span class="status-badge px-2 py-0.5 rounded text-[10px] font-label-caps flex items-center gap-1 w-max" style="border-color: #ffb4ab; color: #ffb4ab; background-color: rgba(255, 180, 171, 0.1);">
+<span class="w-1.5 h-1.5 rounded-full bg-error"></span> CRITICAL
+                                    </span>
+</td>
+</tr>
+<tr class="data-table-row hover:bg-surface-container/40 transition-colors cursor-pointer">
+<td class="p-3 text-on-surface-variant">10:41:55.12</td>
+<td class="p-3 text-primary-fixed">malicious-domain.com</td>
+<td class="p-3">Domain</td>
+<td class="p-3">MISP Core</td>
+<td class="p-3">
+<span class="status-badge px-2 py-0.5 rounded text-[10px] font-label-caps flex items-center gap-1 w-max" style="border-color: #ffb4ab; color: #ffb4ab; background-color: rgba(255, 180, 171, 0.1);">
+<span class="w-1.5 h-1.5 rounded-full bg-error"></span> HIGH
+                                    </span>
+</td>
+</tr>
+<tr class="data-table-row hover:bg-surface-container/40 transition-colors cursor-pointer">
+<td class="p-3 text-on-surface-variant">10:41:30.88</td>
+<td class="p-3 text-primary-fixed">e3b0c44298fc1c149afbf4c8996fb...</td>
+<td class="p-3">SHA256</td>
+<td class="p-3">VirusTotal</td>
+<td class="p-3">
+<span class="status-badge px-2 py-0.5 rounded text-[10px] font-label-caps flex items-center gap-1 w-max" style="border-color: #adc6ff; color: #adc6ff; background-color: rgba(173, 198, 255, 0.1);">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary-fixed"></span> MEDIUM
+                                    </span>
+</td>
+</tr>
+<tr class="data-table-row hover:bg-surface-container/40 transition-colors cursor-pointer">
+<td class="p-3 text-on-surface-variant">10:40:12.45</td>
+<td class="p-3 text-primary-fixed">http://drop.evil.net/pay.bin</td>
+<td class="p-3">URL</td>
+<td class="p-3">Custom Feed A</td>
+<td class="p-3">
+<span class="status-badge px-2 py-0.5 rounded text-[10px] font-label-caps flex items-center gap-1 w-max" style="border-color: #ffb4ab; color: #ffb4ab; background-color: rgba(255, 180, 171, 0.1);">
+<span class="w-1.5 h-1.5 rounded-full bg-error"></span> HIGH
+                                    </span>
+</td>
+</tr>
+<tr class="data-table-row hover:bg-surface-container/40 transition-colors cursor-pointer">
+<td class="p-3 text-on-surface-variant">10:39:05.21</td>
+<td class="p-3 text-primary-fixed">admin@suspicious-corp.biz</td>
+<td class="p-3">Email</td>
+<td class="p-3">Spamhaus</td>
+<td class="p-3">
+<span class="status-badge px-2 py-0.5 rounded text-[10px] font-label-caps flex items-center gap-1 w-max" style="border-color: #849495; color: #849495; background-color: rgba(132, 148, 149, 0.1);">
+<span class="w-1.5 h-1.5 rounded-full bg-outline"></span> LOW
+                                    </span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Top Repeated Indicators -->
+<div class="glass-panel rounded-lg flex flex-col overflow-hidden xl:col-span-1">
+<div class="p-4 border-b border-outline-variant/30 bg-surface-container-low/50">
+<h3 class="font-label-caps text-label-caps text-on-surface uppercase tracking-wider">Top Repeated Indicators</h3>
+</div>
+<div class="flex-1 overflow-y-auto">
+<div class="flex flex-col">
+<div class="flex items-center justify-between p-3 border-b border-outline-variant/10 hover:bg-surface-container/40 transition-colors cursor-pointer">
+<div class="flex flex-col">
+<span class="font-data-mono text-[13px] text-primary-fixed">103.25.x.x</span>
+<span class="font-label-caps text-[10px] text-on-surface-variant mt-0.5">IPv4</span>
+</div>
+<div class="bg-surface-container px-2 py-1 rounded text-data-mono text-[12px] text-on-surface border border-outline-variant/30">14 Feeds</div>
+</div>
+<div class="flex items-center justify-between p-3 border-b border-outline-variant/10 hover:bg-surface-container/40 transition-colors cursor-pointer bg-surface-container-lowest/20">
+<div class="flex flex-col">
+<span class="font-data-mono text-[13px] text-primary-fixed">c2-server-auth.net</span>
+<span class="font-label-caps text-[10px] text-on-surface-variant mt-0.5">Domain</span>
+</div>
+<div class="bg-surface-container px-2 py-1 rounded text-data-mono text-[12px] text-on-surface border border-outline-variant/30">11 Feeds</div>
+</div>
+<div class="flex items-center justify-between p-3 border-b border-outline-variant/10 hover:bg-surface-container/40 transition-colors cursor-pointer">
+<div class="flex flex-col">
+<span class="font-data-mono text-[13px] text-primary-fixed">d41d8cd98f00b204e98...</span>
+<span class="font-label-caps text-[10px] text-on-surface-variant mt-0.5">MD5</span>
+</div>
+<div class="bg-surface-container px-2 py-1 rounded text-data-mono text-[12px] text-on-surface border border-outline-variant/30">8 Feeds</div>
+</div>
+<div class="flex items-center justify-between p-3 border-b border-outline-variant/10 hover:bg-surface-container/40 transition-colors cursor-pointer bg-surface-container-lowest/20">
+<div class="flex flex-col">
+<span class="font-data-mono text-[13px] text-primary-fixed">45.22.x.x</span>
+<span class="font-label-caps text-[10px] text-on-surface-variant mt-0.5">IPv4</span>
+</div>
+<div class="bg-surface-container px-2 py-1 rounded text-data-mono text-[12px] text-on-surface border border-outline-variant/30">6 Feeds</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>

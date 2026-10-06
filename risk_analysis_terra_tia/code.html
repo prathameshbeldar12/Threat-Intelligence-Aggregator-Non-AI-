@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Severity / Risk Analysis - Threat Intelligence Aggregator</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Literata:wght@400;600;700&amp;family=Nunito+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "inverse-surface": "#2e3230",
+                        "error-container": "#ffdad8",
+                        "tertiary": "#705c30",
+                        "surface-container": "#f0ece4",
+                        "tertiary-fixed-dim": "#dcc48e",
+                        "surface-container-highest": "#e4e0d8",
+                        "on-secondary-fixed-variant": "#4a4538",
+                        "on-secondary-fixed": "#1e1a13",
+                        "inverse-primary": "#8ecf9e",
+                        "surface-dim": "#dbd7cf",
+                        "outline": "#74796e",
+                        "error": "#b83230",
+                        "on-tertiary-fixed": "#221a05",
+                        "surface-container-high": "#eae6de",
+                        "primary": "#4a7c59",
+                        "on-error": "#ffffff",
+                        "surface-variant": "#e4e0d8",
+                        "primary-fixed": "#c8e8d0",
+                        "surface": "#faf6f0",
+                        "tertiary-fixed": "#f8e0a8",
+                        "on-primary-fixed-variant": "#2a6038",
+                        "outline-variant": "#c4c8bc",
+                        "on-tertiary": "#ffffff",
+                        "surface-container-low": "#f5f1ea",
+                        "secondary-fixed": "#f0e8db",
+                        "inverse-on-surface": "#f5f0e8",
+                        "on-primary-fixed": "#002110",
+                        "background": "#faf6f0",
+                        "on-primary": "#ffffff",
+                        "on-surface": "#2e3230",
+                        "on-secondary-container": "#5e5548",
+                        "on-secondary": "#ffffff",
+                        "secondary-container": "#f0e8db",
+                        "on-primary-container": "#d8f0de",
+                        "surface-bright": "#faf6f0",
+                        "on-surface-variant": "#4a4e4a",
+                        "tertiary-container": "#c4a66a",
+                        "on-tertiary-fixed-variant": "#554020",
+                        "primary-fixed-dim": "#8ecf9e",
+                        "on-error-container": "#690005",
+                        "primary-container": "#78a886",
+                        "surface-container-lowest": "#ffffff",
+                        "on-background": "#2e3230",
+                        "secondary-fixed-dim": "#d4ccbf",
+                        "on-tertiary-container": "#554020",
+                        "secondary": "#6b6358",
+                        "surface-tint": "#4a7c59"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {},
+                    "fontFamily": {
+                        "headline": ["Literata"],
+                        "display": ["Literata"],
+                        "body": ["Nunito Sans"],
+                        "label": ["Nunito Sans"]
+                    },
+                    "fontSize": {}
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background text-on-surface font-body text-base antialiased min-h-screen selection:bg-primary-fixed selection:text-on-primary-fixed">
+<!-- Top Navigation (Generated from JSON) -->
+<nav class="fixed top-0 right-0 left-64 flex justify-between items-center px-4 h-16 z-40 bg-surface/80 backdrop-blur-md hidden md:flex border-b border-outline-variant/30">
+<div class="flex items-center gap-4">
+<span class="font-headline text-2xl font-bold text-primary">ThreatIntel</span>
+<div class="relative ml-8 flex items-center">
+<span class="material-symbols-outlined absolute left-3 text-on-surface-variant font-label text-xs uppercase" style="font-size: 16px;">search</span>
+<input class="bg-surface-container-highest border-b border-outline-variant/50 focus:border-primary text-on-surface font-mono text-sm pl-10 pr-4 py-2 w-64 focus:outline-none transition-colors rounded-t-md" placeholder="Search IOCs, Feeds..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<button class="text-on-surface-variant hover:text-primary transition-opacity" title="notifications">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="text-on-surface-variant hover:text-primary transition-opacity" title="dark_mode">
+<span class="material-symbols-outlined">light_mode</span>
+</button>
+<button class="text-on-surface-variant hover:text-primary transition-opacity" title="schedule">
+<span class="material-symbols-outlined">schedule</span>
+</button>
+<div class="h-6 w-px bg-outline-variant/50"></div>
+<button class="font-label text-xs uppercase tracking-wider font-semibold text-on-surface-variant hover:text-primary transition-opacity">
+                Settings
+            </button>
+<div class="w-8 h-8 rounded-full overflow-hidden border border-outline-variant">
+<img alt="SOC Analyst Profile" class="w-full h-full object-cover" data-alt="A warm, organic avatar for a security analyst. Natural tones." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAB1a2FYox6nqxT_-WFtLUr99K3bTPUDHhZQtAPPAJfrz2rhGb343QQvo_bCmNvWPWiIEWXbWZiyOhFk794_RkCsscn59bDwE-V8ZJf9RZO16ASujRqruGkqT56ZMIFV7D_uQ33TqroCILhi1_55aykhPSotKnqDeTpGiOw1JrbmFnU3kEmzrZIOK1WjTlqUOiGEGP_VNtKm0Xiyo7WvctZxeJNsbvOlPLFcGaXWtpQ5_DYLB309s6vzg"/>
+</div>
+</div>
+</nav>
+<!-- Side Navigation (Generated from JSON) -->
+<aside class="fixed left-0 top-0 h-full flex flex-col z-50 bg-surface-container/80 backdrop-blur-xl border-r border-outline-variant/30 shadow-sm docked left-0 h-screen w-64 hidden md:flex">
+<div class="p-6 border-b border-outline-variant/30">
+<div class="flex items-center gap-3 mb-1">
+<div class="w-10 h-10 rounded-lg overflow-hidden border border-primary/30 bg-primary/10 flex items-center justify-center">
+<span class="font-display text-2xl font-bold text-primary tracking-tighter">TIA</span>
+</div>
+<div>
+<h1 class="font-headline text-sm font-bold text-primary">Threat Intelligence</h1>
+</div>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto py-4 flex flex-col gap-1 px-3">
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant font-medium hover:bg-surface-container-highest hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined" style="font-size: 20px;">dashboard</span>
+<span class="font-body text-sm">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant font-medium hover:bg-surface-container-highest hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined" style="font-size: 20px;">rss_feed</span>
+<span class="font-body text-sm">Feed Management</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-primary font-bold border-l-4 border-primary bg-primary/10" href="#">
+<span class="material-symbols-outlined" style="font-size: 20px;">search_check</span>
+<span class="font-body text-sm">IOC Explorer</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant font-medium hover:bg-surface-container-highest hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined" style="font-size: 20px;">hub</span>
+<span class="font-body text-sm">Correlation</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant font-medium hover:bg-surface-container-highest hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined" style="font-size: 20px;">block</span>
+<span class="font-body text-sm">Blocklists</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant font-medium hover:bg-surface-container-highest hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined" style="font-size: 20px;">assessment</span>
+<span class="font-body text-sm">Reports</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant font-medium hover:bg-surface-container-highest hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined" style="font-size: 20px;">history</span>
+<span class="font-body text-sm">Activity Logs</span>
+</a>
+<div class="mt-auto pt-4 border-t border-outline-variant/30 flex flex-col gap-1">
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant font-medium hover:bg-surface-container-highest hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined" style="font-size: 20px;">settings</span>
+<span class="font-body text-sm">Settings</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant font-medium hover:bg-surface-container-highest hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined" style="font-size: 20px;">info</span>
+<span class="font-body text-sm">About</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-error hover:bg-error-container/50 transition-colors" href="#">
+<span class="material-symbols-outlined" style="font-size: 20px;">logout</span>
+<span class="font-body text-sm">Logout</span>
+</a>
+</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="md:ml-64 pt-20 p-6 md:p-8 min-h-screen flex flex-col gap-8">
+<!-- Header Section -->
+<header class="flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<h1 class="font-headline text-3xl font-bold text-on-surface">Severity &amp; Risk Analysis Engine</h1>
+<div class="bg-surface border border-primary/30 px-4 py-2 rounded-full flex items-center gap-2 shadow-sm">
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+<span class="font-label text-xs uppercase tracking-wider font-semibold text-primary">SYSTEM ACTIVE</span>
+</div>
+</div>
+<p class="font-body text-base text-on-surface-variant max-w-3xl">
+                Transparent, deterministic indicator classification.
+            </p>
+<div class="mt-2 flex items-center gap-2 text-secondary bg-secondary-container/50 px-3 py-1.5 rounded-lg w-fit border border-secondary/20">
+<span class="material-symbols-outlined" style="font-size: 16px;">gavel</span>
+<span class="font-label text-xs uppercase tracking-wider font-semibold">Rule-based analysis — No Machine Learning used.</span>
+</div>
+</header>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+<!-- Rules Overview (Logic Board) -->
+<section class="col-span-1 md:col-span-8 bg-surface rounded-2xl p-6 flex flex-col gap-4 border border-outline-variant/50 shadow-sm">
+<div class="border-b border-outline-variant/50 pb-3">
+<h2 class="font-headline text-2xl font-semibold text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">account_tree</span>
+                        Classification Logic Hierarchy
+                    </h2>
+</div>
+<div class="flex flex-col gap-3 font-mono text-sm">
+<!-- Rule 1 -->
+<div class="flex items-center gap-4 bg-surface-container p-3 rounded-xl border border-outline-variant/50 hover:border-primary/50 transition-colors">
+<div class="w-12 text-center text-on-surface-variant">IF</div>
+<div class="flex-1 flex items-center gap-2 text-on-surface">
+<span class="material-symbols-outlined text-outline">dns</span>
+<span>Feed_Count == 1</span>
+</div>
+<div class="w-12 text-center text-on-surface-variant">THEN</div>
+<div class="w-24">
+<div class="border border-outline px-2 py-1 rounded-lg text-center text-outline bg-surface-container-highest text-xs flex items-center justify-center gap-1 font-bold">
+<span class="w-1.5 h-1.5 rounded-full bg-outline"></span> LOW
+                            </div>
+</div>
+</div>
+<!-- Rule 2 -->
+<div class="flex items-center gap-4 bg-surface-container p-3 rounded-xl border border-outline-variant/50 hover:border-primary/50 transition-colors">
+<div class="w-12 text-center text-on-surface-variant">IF</div>
+<div class="flex-1 flex items-center gap-2 text-on-surface">
+<span class="material-symbols-outlined text-secondary">dns</span>
+<span>Feed_Count == 2</span>
+</div>
+<div class="w-12 text-center text-on-surface-variant">THEN</div>
+<div class="w-24">
+<div class="border border-secondary px-2 py-1 rounded-lg text-center text-secondary bg-secondary-container/50 text-xs flex items-center justify-center gap-1 font-bold">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> MEDIUM
+                            </div>
+</div>
+</div>
+<!-- Rule 3 -->
+<div class="flex items-center gap-4 bg-surface-container p-3 rounded-xl border border-outline-variant/50 hover:border-primary/50 transition-colors">
+<div class="w-12 text-center text-on-surface-variant">IF</div>
+<div class="flex-1 flex items-center gap-2 text-on-surface">
+<span class="material-symbols-outlined text-error">dns</span>
+<span>Feed_Count &gt;= 3 &amp;&amp; Feed_Count &lt;= 4</span>
+</div>
+<div class="w-12 text-center text-on-surface-variant">THEN</div>
+<div class="w-24">
+<div class="border border-error px-2 py-1 rounded-lg text-center text-error bg-error-container/50 text-xs flex items-center justify-center gap-1 font-bold">
+<span class="w-1.5 h-1.5 rounded-full bg-error"></span> HIGH
+                            </div>
+</div>
+</div>
+<!-- Rule 4 -->
+<div class="flex items-center gap-4 bg-primary-container/20 p-3 rounded-xl border border-primary/40 shadow-sm">
+<div class="w-12 text-center text-on-surface-variant">IF</div>
+<div class="flex-1 flex items-center gap-2 text-on-surface">
+<span class="material-symbols-outlined text-primary">dns</span>
+<span class="text-primary font-bold">Feed_Count &gt;= 5</span>
+</div>
+<div class="w-12 text-center text-on-surface-variant">THEN</div>
+<div class="w-24">
+<div class="border border-primary px-2 py-1 rounded-lg text-center text-primary bg-primary-container/30 text-xs flex items-center justify-center gap-1 font-bold">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span> CRITICAL
+                            </div>
+</div>
+</div>
+</div>
+</section>
+<!-- Risk Score Meter -->
+<section class="col-span-1 md:col-span-4 bg-surface rounded-2xl p-6 flex flex-col justify-center items-center gap-6 border border-outline-variant/50 shadow-sm">
+<h3 class="font-headline text-2xl font-semibold text-on-surface self-start w-full border-b border-outline-variant/50 pb-3">Weight Distribution</h3>
+<div class="relative w-48 h-48 flex items-center justify-center rounded-full border-8 border-surface-container">
+<!-- Fake radial progress -->
+<div class="absolute inset-0 rounded-full border-8 border-primary" style="clip-path: polygon(50% 50%, 50% 0, 100% 0, 100% 100%, 50% 100%);"></div>
+<div class="absolute inset-0 rounded-full border-8 border-secondary" style="clip-path: polygon(50% 50%, 50% 100%, 0 100%, 0 50%);"></div>
+<div class="text-center z-10 flex flex-col items-center bg-surface p-4 rounded-full shadow-sm border border-outline-variant/20">
+<span class="font-display text-3xl font-bold text-primary">Rule</span>
+<span class="font-label text-xs uppercase tracking-wider font-semibold text-on-surface-variant">Engine</span>
+</div>
+</div>
+<div class="w-full grid grid-cols-2 gap-3 mt-4">
+<div class="flex items-center gap-2 font-label text-xs uppercase tracking-wider font-semibold text-on-surface">
+<span class="w-3 h-3 bg-primary rounded-sm"></span> Feed Count (60%)
+                    </div>
+<div class="flex items-center gap-2 font-label text-xs uppercase tracking-wider font-semibold text-on-surface">
+<span class="w-3 h-3 bg-secondary rounded-sm"></span> Occurrences (30%)
+                    </div>
+<div class="flex items-center gap-2 font-label text-xs uppercase tracking-wider font-semibold text-on-surface">
+<span class="w-3 h-3 bg-outline rounded-sm"></span> Recency (10%)
+                    </div>
+</div>
+</section>
+<!-- Factor Breakdown -->
+<section class="col-span-1 md:col-span-12 grid grid-cols-2 md:grid-cols-4 gap-6">
+<div class="bg-surface p-5 rounded-2xl flex flex-col gap-2 border border-outline-variant/50 shadow-sm">
+<span class="material-symbols-outlined text-outline text-3xl">category</span>
+<span class="font-label text-xs uppercase tracking-wider font-semibold text-on-surface-variant">Indicator Type</span>
+<span class="font-body text-base font-semibold text-on-surface">IP, Domain, Hash</span>
+</div>
+<div class="bg-surface p-5 rounded-2xl flex flex-col gap-2 border border-outline-variant/50 shadow-sm">
+<span class="material-symbols-outlined text-primary text-3xl">lan</span>
+<span class="font-label text-xs uppercase tracking-wider font-semibold text-on-surface-variant">Source Count</span>
+<span class="font-body text-base font-semibold text-on-surface">Primary Severity Driver</span>
+</div>
+<div class="bg-surface p-5 rounded-2xl flex flex-col gap-2 border border-outline-variant/50 shadow-sm">
+<span class="material-symbols-outlined text-secondary text-3xl">update</span>
+<span class="font-label text-xs uppercase tracking-wider font-semibold text-on-surface-variant">Recency</span>
+<span class="font-body text-base font-semibold text-on-surface">Time since last seen</span>
+</div>
+<div class="bg-surface p-5 rounded-2xl flex flex-col gap-2 border border-outline-variant/50 shadow-sm">
+<span class="material-symbols-outlined text-error text-3xl">repeat</span>
+<span class="font-label text-xs uppercase tracking-wider font-semibold text-on-surface-variant">Occurrences</span>
+<span class="font-body text-base font-semibold text-on-surface">Frequency of hits</span>
+</div>
+</section>
+<!-- Example Analysis Case -->
+<section class="col-span-1 md:col-span-12 bg-surface rounded-2xl p-8 border border-outline-variant/50 shadow-sm border-t-4 border-t-primary">
+<div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-outline-variant/50 pb-4 mb-6 gap-4">
+<div>
+<h2 class="font-headline text-2xl font-semibold text-on-surface mb-1">Example Analysis Case</h2>
+<span class="font-mono text-sm text-on-surface-variant">Target IOC: <span class="text-primary font-bold">192.168.1.105</span> (IPv4)</span>
+</div>
+<div class="border border-primary px-4 py-2 rounded-xl text-center text-primary bg-primary-container/20 text-sm flex items-center justify-center gap-2 font-bold shadow-sm">
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span> CRITICAL CLASSIFICATION
+                    </div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+<div>
+<h4 class="font-label text-xs uppercase tracking-wider font-semibold text-on-surface-variant mb-3">REASON FOR CLASSIFICATION</h4>
+<p class="font-body text-base text-on-surface p-5 bg-surface-container rounded-xl border border-outline-variant/30 leading-relaxed">
+                            "Critical — Indicator observed in 6 independent feeds."
+                        </p>
+</div>
+<div>
+<h4 class="font-label text-xs uppercase tracking-wider font-semibold text-on-surface-variant mb-3">TRIGGERED RULE PATH</h4>
+<div class="font-mono text-sm flex flex-col gap-2 p-5 bg-surface-container-low rounded-xl border border-outline-variant/30 text-on-surface">
+<div class="text-on-surface-variant opacity-80">&gt; Analyzing IOC...</div>
+<div class="text-on-surface-variant opacity-80">&gt; Count feeds: 6</div>
+<div class="text-primary font-medium">&gt; Match: Rule 4 (Feed_Count &gt;= 5)</div>
+<div class="text-primary font-bold mt-1 pt-2 border-t border-primary/20">&gt; Assert Severity = CRITICAL</div>
+</div>
+</div>
+</div>
+</section>
+</div>
+</main>
+</body></html>

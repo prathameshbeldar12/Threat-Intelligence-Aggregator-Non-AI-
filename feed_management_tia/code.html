@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>TIA - Feed Management</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&amp;family=JetBrains+Mono:wght@500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-fixed-dim": "#adc6ff",
+                        "primary-fixed": "#74f5ff",
+                        "surface-container-lowest": "#0d0e13",
+                        "on-surface": "#e3e1e9",
+                        "outline-variant": "#3a494b",
+                        "secondary": "#adc6ff",
+                        "on-secondary-container": "#e6ecff",
+                        "tertiary-fixed": "#e9ddff",
+                        "secondary-fixed": "#d8e2ff",
+                        "on-secondary-fixed": "#001a42",
+                        "on-primary": "#00363a",
+                        "on-error": "#690005",
+                        "on-tertiary-fixed": "#23005c",
+                        "on-secondary-fixed-variant": "#004395",
+                        "tertiary-container": "#e2d4ff",
+                        "on-secondary": "#002e6a",
+                        "primary-container": "#00f2ff",
+                        "on-primary-fixed-variant": "#004f54",
+                        "on-tertiary-container": "#6f3cd8",
+                        "surface": "#121318",
+                        "error-container": "#93000a",
+                        "inverse-primary": "#00696f",
+                        "primary-fixed-dim": "#00dbe7",
+                        "on-surface-variant": "#b9cacb",
+                        "on-background": "#e3e1e9",
+                        "on-tertiary": "#3c0091",
+                        "error": "#ffb4ab",
+                        "secondary-container": "#0566d9",
+                        "on-primary-container": "#006a71",
+                        "surface-bright": "#38393f",
+                        "surface-container-highest": "#34343a",
+                        "surface-variant": "#34343a",
+                        "outline": "#849495",
+                        "inverse-surface": "#e3e1e9",
+                        "tertiary": "#fcf5ff",
+                        "surface-dim": "#121318",
+                        "tertiary-fixed-dim": "#d0bcff",
+                        "surface-container": "#1e1f25",
+                        "background": "#121318",
+                        "surface-container-high": "#292a2f",
+                        "on-primary-fixed": "#002022",
+                        "on-tertiary-fixed-variant": "#5516be",
+                        "surface-tint": "#00dbe7",
+                        "on-error-container": "#ffdad6",
+                        "inverse-on-surface": "#2f3036",
+                        "surface-container-low": "#1a1b21",
+                        "primary": "#e1fdff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "container-padding": "24px",
+                        "unit": "4px",
+                        "gutter": "16px",
+                        "stack-sm": "8px",
+                        "stack-md": "16px",
+                        "stack-lg": "32px"
+                    },
+                    "fontFamily": {
+                        "label-caps": ["JetBrains Mono"],
+                        "data-mono": ["JetBrains Mono"],
+                        "display-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "body-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "label-caps": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700" }],
+                        "data-mono": ["14px", { "lineHeight": "20px", "fontWeight": "500" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: #050507;
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(116, 245, 255, 0.03), transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(5, 102, 217, 0.03), transparent 25%);
+        }
+        
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.4);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .glass-panel:hover {
+            border-color: rgba(255, 255, 255, 0.3);
+            transition: border-color 0.3s ease;
+        }
+
+        .glass-modal {
+            background: rgba(13, 14, 19, 0.85);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(116, 245, 255, 0.2);
+            box-shadow: 0 0 40px rgba(116, 245, 255, 0.05);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #74f5ff 0%, #0566d9 100%);
+            color: #002022;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            box-shadow: 0 0 15px rgba(116, 245, 255, 0.4);
+            transform: translateY(-1px);
+        }
+
+        .btn-glass {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #e3e1e9;
+            transition: all 0.3s ease;
+        }
+
+        .btn-glass:hover {
+            border-color: #74f5ff;
+            box-shadow: 0 0 10px rgba(116, 245, 255, 0.2);
+            color: #74f5ff;
+        }
+
+        .status-badge {
+            border: 1px solid;
+            background-color: rgba(255, 255, 255, 0.1); /* Base, overridden inline */
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .status-dot {
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+        }
+
+        .input-glass {
+            background: rgba(26, 27, 33, 0.6);
+            border: none;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            color: #e3e1e9;
+            transition: all 0.3s ease;
+        }
+
+        .input-glass:focus {
+            outline: none;
+            border: 1px solid #74f5ff;
+            box-shadow: inset 0 0 10px rgba(116, 245, 255, 0.1);
+            background: rgba(26, 27, 33, 0.9);
+        }
+
+        .table-row-zebra:nth-child(even) {
+            background-color: rgba(255, 255, 255, 0.02);
+        }
+        
+        .table-row-zebra:hover {
+            background-color: rgba(116, 245, 255, 0.05);
+        }
+
+        /* Custom Scrollbar for dark theme */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(18, 19, 24, 0.5);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(58, 73, 75, 0.5);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(116, 245, 255, 0.5);
+        }
+    </style>
+</head>
+<body class="text-on-background font-body-md antialiased overflow-x-hidden min-h-screen flex">
+<!-- SideNavBar (Shared Component Blueprint) -->
+<nav class="fixed left-0 top-0 h-full flex flex-col z-50 bg-surface-container-low/40 backdrop-blur-xl border-r border-outline-variant/20 shadow-2xl w-64 transition-all duration-300 ease-in-out hidden md:flex">
+<div class="p-container-padding border-b border-outline-variant/20 flex items-center gap-3">
+<div class="w-10 h-10 rounded bg-primary-fixed/20 border border-primary-fixed flex items-center justify-center">
+<span class="material-symbols-outlined text-primary-fixed" style="font-variation-settings: 'FILL' 1;">shield</span>
+</div>
+<div>
+<h1 class="font-display-lg text-display-lg font-bold text-primary-fixed tracking-tighter" style="font-size: 24px; line-height: 28px;">TIA</h1>
+<p class="font-label-caps text-label-caps text-on-surface-variant">Threat Intelligence</p>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto py-stack-md flex flex-col gap-1 px-3">
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant font-medium hover:bg-surface-container-highest/50 hover:text-primary-fixed transition-colors" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span>Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-primary-fixed font-bold border-l-2 border-primary-fixed bg-primary/10 transition-colors" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">rss_feed</span>
+<span>Feed Management</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant font-medium hover:bg-surface-container-highest/50 hover:text-primary-fixed transition-colors" href="#">
+<span class="material-symbols-outlined">search_check</span>
+<span>IOC Explorer</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant font-medium hover:bg-surface-container-highest/50 hover:text-primary-fixed transition-colors" href="#">
+<span class="material-symbols-outlined">hub</span>
+<span>Correlation</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant font-medium hover:bg-surface-container-highest/50 hover:text-primary-fixed transition-colors" href="#">
+<span class="material-symbols-outlined">block</span>
+<span>Blocklists</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant font-medium hover:bg-surface-container-highest/50 hover:text-primary-fixed transition-colors" href="#">
+<span class="material-symbols-outlined">assessment</span>
+<span>Reports</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant font-medium hover:bg-surface-container-highest/50 hover:text-primary-fixed transition-colors" href="#">
+<span class="material-symbols-outlined">history</span>
+<span>Activity Logs</span>
+</a>
+</div>
+<div class="p-container-padding border-t border-outline-variant/20 flex flex-col gap-1">
+<a class="flex items-center gap-3 px-4 py-2 rounded-lg text-on-surface-variant font-medium hover:bg-surface-container-highest/50 hover:text-primary-fixed transition-colors" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span>Settings</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 rounded-lg text-on-surface-variant font-medium hover:bg-surface-container-highest/50 hover:text-primary-fixed transition-colors" href="#">
+<span class="material-symbols-outlined">info</span>
+<span>About</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 rounded-lg text-error font-medium hover:bg-error/10 transition-colors mt-2" href="#">
+<span class="material-symbols-outlined">logout</span>
+<span>Logout</span>
+</a>
+</div>
+</nav>
+<!-- TopNavBar (Shared Component Blueprint) -->
+<header class="fixed top-0 right-0 left-0 md:left-64 flex justify-between items-center px-gutter h-16 z-40 bg-surface-container-lowest/30 backdrop-blur-md border-b border-outline-variant/20">
+<div class="flex items-center gap-4">
+<button class="md:hidden text-primary-fixed p-2">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<div class="hidden md:flex items-center gap-2 bg-surface-container-highest/50 rounded-full px-4 py-1 border border-outline-variant/30">
+<span class="material-symbols-outlined text-on-surface-variant text-sm">search</span>
+<input class="bg-transparent border-none text-body-sm text-on-surface focus:ring-0 placeholder-on-surface-variant w-64" placeholder="Search globally..." type="text"/>
+<span class="text-on-surface-variant font-label-caps text-[10px] bg-surface-container px-1.5 rounded">⌘K</span>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="text-on-surface-variant hover:text-primary-container transition-opacity p-2 relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-1.5 right-1.5 w-2 h-2 bg-primary-fixed rounded-full animate-pulse"></span>
+</button>
+<button class="text-on-surface-variant hover:text-primary-container transition-opacity p-2">
+<span class="material-symbols-outlined">dark_mode</span>
+</button>
+<button class="text-on-surface-variant hover:text-primary-container transition-opacity p-2">
+<span class="material-symbols-outlined">schedule</span>
+</button>
+<div class="h-8 w-px bg-outline-variant/30 mx-2"></div>
+<button class="flex items-center gap-2 text-on-surface-variant hover:text-primary-container transition-opacity">
+<img alt="SOC Analyst Profile" class="w-8 h-8 rounded-full border border-primary-fixed/50 object-cover" data-alt="A small circular avatar showing a serious cybersecurity professional in a dimly lit, blue-tinted high-tech operations center. High contrast, cinematic lighting, modern professional aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBd5b9Dsls-gJh0sayTieaX1pA4Fpt6pv88oD1Wb2LfYp9d9iVyOs_c9Kmez4cjZMy5V3CFqh95uyV-Yf-CoI-6fCg-jYFt9IfBZ_22N8xAlabXLKscMxreCKK6zJ7vLx0_EHADOJsLOvUBDz6XoGYraLjZncHnFpge4vShUw1hG8s2A8jC4Z3H-QaDhnyRIdvbZpDwLBdzwDgSO0cOc7orCg2QdkuG9ZdxkWZ0_lCawJIbSuwe5Bzn7A"/>
+<span class="font-label-caps text-label-caps hidden lg:block">Settings</span>
+</button>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-1 md:ml-64 pt-16 min-h-screen relative">
+<!-- Abstract glowing background element -->
+<div class="absolute top-0 right-0 w-[800px] h-[600px] bg-primary-fixed/5 rounded-full blur-[120px] pointer-events-none"></div>
+<div class="p-container-padding max-w-[1600px] mx-auto space-y-stack-lg relative z-10">
+<!-- Page Header -->
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+<div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface">Feed Management</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Configure, monitor, and process incoming threat intelligence streams.</p>
+</div>
+<div class="flex items-center gap-3">
+<button class="btn-glass px-4 py-2 rounded-lg font-label-caps text-label-caps flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">refresh</span>
+                        REFRESH ALL
+                    </button>
+<button class="btn-primary px-4 py-2 rounded-lg font-label-caps text-label-caps flex items-center gap-2 font-bold" onclick="document.getElementById('add-feed-modal').classList.remove('hidden'); document.getElementById('add-feed-modal').classList.add('flex');">
+<span class="material-symbols-outlined text-[18px]">add</span>
+                        ADD FEED
+                    </button>
+</div>
+</div>
+<!-- Statistics Bento Grid -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-gutter">
+<!-- Stat Card 1 -->
+<div class="glass-panel rounded-xl p-5 relative overflow-hidden group">
+<div class="absolute top-0 right-0 w-32 h-32 bg-primary-fixed/10 rounded-full blur-2xl -mr-10 -mt-10 group-hover:bg-primary-fixed/20 transition-colors"></div>
+<div class="flex justify-between items-start mb-4 relative z-10">
+<div class="w-10 h-10 rounded bg-primary-fixed/10 border border-primary-fixed/30 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary-fixed">rss_feed</span>
+</div>
+<span class="font-label-caps text-label-caps text-primary-fixed bg-primary-fixed/10 px-2 py-1 rounded">HEALTHY</span>
+</div>
+<div class="relative z-10">
+<p class="font-label-caps text-label-caps text-on-surface-variant mb-1">ACTIVE FEEDS</p>
+<div class="flex items-end gap-3">
+<h3 class="font-display-lg text-[40px] leading-none font-bold text-on-surface">124</h3>
+<span class="font-body-sm text-body-sm text-primary-fixed mb-1 flex items-center"><span class="material-symbols-outlined text-[14px]">arrow_upward</span> 3%</span>
+</div>
+</div>
+</div>
+<!-- Stat Card 2 -->
+<div class="glass-panel rounded-xl p-5 relative overflow-hidden group border-error/20 hover:border-error/50">
+<div class="absolute top-0 right-0 w-32 h-32 bg-error/10 rounded-full blur-2xl -mr-10 -mt-10 group-hover:bg-error/20 transition-colors"></div>
+<div class="flex justify-between items-start mb-4 relative z-10">
+<div class="w-10 h-10 rounded bg-error/10 border border-error/30 flex items-center justify-center">
+<span class="material-symbols-outlined text-error">warning</span>
+</div>
+<span class="font-label-caps text-label-caps text-error bg-error/10 px-2 py-1 rounded">ATTENTION</span>
+</div>
+<div class="relative z-10">
+<p class="font-label-caps text-label-caps text-on-surface-variant mb-1">FAILED FEEDS</p>
+<div class="flex items-end gap-3">
+<h3 class="font-display-lg text-[40px] leading-none font-bold text-on-surface">3</h3>
+<span class="font-body-sm text-body-sm text-error mb-1">Requires review</span>
+</div>
+</div>
+</div>
+<!-- Stat Card 3 -->
+<div class="glass-panel rounded-xl p-5 relative overflow-hidden group">
+<div class="absolute top-0 right-0 w-32 h-32 bg-secondary-container/10 rounded-full blur-2xl -mr-10 -mt-10 group-hover:bg-secondary-container/20 transition-colors"></div>
+<div class="flex justify-between items-start mb-4 relative z-10">
+<div class="w-10 h-10 rounded bg-secondary-container/20 border border-secondary-container/30 flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary-fixed-dim">troubleshoot</span>
+</div>
+<span class="font-label-caps text-label-caps text-secondary-fixed-dim bg-secondary-container/20 px-2 py-1 rounded">24H VOL</span>
+</div>
+<div class="relative z-10">
+<p class="font-label-caps text-label-caps text-on-surface-variant mb-1">TOTAL INDICATORS FOUND</p>
+<div class="flex items-end gap-3">
+<h3 class="font-display-lg text-[40px] leading-none font-bold text-on-surface font-data-mono">84.2K</h3>
+<span class="font-body-sm text-body-sm text-on-surface-variant mb-1">Parsed</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Feed Table Area -->
+<div class="glass-panel rounded-xl flex flex-col">
+<!-- Table Toolbar -->
+<div class="p-4 border-b border-outline-variant/20 flex flex-col sm:flex-row justify-between items-center gap-4 bg-surface-container-lowest/50 rounded-t-xl">
+<div class="relative w-full sm:w-96">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px]">search</span>
+<input class="w-full bg-surface-container/50 border border-outline-variant/30 rounded-lg pl-10 pr-4 py-2 text-body-sm text-on-surface focus:border-primary-fixed focus:ring-1 focus:ring-primary-fixed transition-colors" placeholder="Search feeds by name, source, or tag..." type="text"/>
+</div>
+<div class="flex items-center gap-2 w-full sm:w-auto">
+<button class="btn-glass px-3 py-1.5 rounded text-body-sm flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">filter_list</span>
+                            Filter
+                        </button>
+<button class="btn-glass px-3 py-1.5 rounded text-body-sm flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">view_column</span>
+                            Columns
+                        </button>
+</div>
+</div>
+<!-- Table Content -->
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse min-w-[1000px]">
+<thead>
+<tr class="border-b border-outline-variant/30 bg-surface-container-highest/20">
+<th class="py-3 px-4 font-label-caps text-label-caps text-on-surface-variant">FEED NAME</th>
+<th class="py-3 px-4 font-label-caps text-label-caps text-on-surface-variant">SOURCE</th>
+<th class="py-3 px-4 font-label-caps text-label-caps text-on-surface-variant">FORMAT</th>
+<th class="py-3 px-4 font-label-caps text-label-caps text-on-surface-variant">LAST UPDATED</th>
+<th class="py-3 px-4 font-label-caps text-label-caps text-on-surface-variant">INDICATORS</th>
+<th class="py-3 px-4 font-label-caps text-label-caps text-on-surface-variant">STATUS</th>
+<th class="py-3 px-4 font-label-caps text-label-caps text-on-surface-variant text-right">ACTIONS</th>
+</tr>
+</thead>
+<tbody class="font-data-mono text-data-mono">
+<!-- Row 1 -->
+<tr class="border-b border-outline-variant/10 table-row-zebra">
+<td class="py-3 px-4">
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-primary-fixed"></div>
+<span class="text-on-surface font-semibold font-body-sm">AlienVault OTX - IP Rep</span>
+</div>
+</td>
+<td class="py-3 px-4 text-on-surface-variant text-xs truncate max-w-[200px]" title="https://otx.alienvault.com/api/v1/pulses/">https://otx.alienvault...</td>
+<td class="py-3 px-4">
+<span class="bg-surface-container-high px-2 py-1 rounded text-xs border border-outline-variant/30 text-on-surface">JSON</span>
+</td>
+<td class="py-3 px-4 text-on-surface-variant">10m ago</td>
+<td class="py-3 px-4 text-primary-fixed">1,245</td>
+<td class="py-3 px-4">
+<div class="status-badge px-2 py-0.5 rounded-full text-[10px] font-label-caps tracking-wider" style="border-color: #74f5ff; color: #74f5ff; background-color: rgba(116, 245, 255, 0.1);">
+<div class="status-dot bg-primary-fixed"></div>
+                                        ACTIVE
+                                    </div>
+</td>
+<td class="py-3 px-4 text-right flex justify-end gap-1">
+<button class="p-1.5 text-on-surface-variant hover:text-primary-fixed transition-colors rounded hover:bg-surface-container-highest" title="View">
+<span class="material-symbols-outlined text-[18px]">visibility</span>
+</button>
+<button class="p-1.5 text-on-surface-variant hover:text-primary-fixed transition-colors rounded hover:bg-surface-container-highest" title="Process">
+<span class="material-symbols-outlined text-[18px]">play_arrow</span>
+</button>
+<button class="p-1.5 text-on-surface-variant hover:text-primary-fixed transition-colors rounded hover:bg-surface-container-highest" title="Refresh">
+<span class="material-symbols-outlined text-[18px]">refresh</span>
+</button>
+<button class="p-1.5 text-on-surface-variant hover:text-error transition-colors rounded hover:bg-error/10" title="Delete">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+</button>
+</td>
+</tr>
+<!-- Row 2 (Error) -->
+<tr class="border-b border-outline-variant/10 table-row-zebra">
+<td class="py-3 px-4">
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-error"></div>
+<span class="text-on-surface font-semibold font-body-sm">Emerging Threats - BlockIP</span>
+</div>
+</td>
+<td class="py-3 px-4 text-on-surface-variant text-xs truncate max-w-[200px]">https://rules.emergingt...</td>
+<td class="py-3 px-4">
+<span class="bg-surface-container-high px-2 py-1 rounded text-xs border border-outline-variant/30 text-on-surface">TXT</span>
+</td>
+<td class="py-3 px-4 text-error">2h ago (Timeout)</td>
+<td class="py-3 px-4 text-on-surface-variant">--</td>
+<td class="py-3 px-4">
+<div class="status-badge px-2 py-0.5 rounded-full text-[10px] font-label-caps tracking-wider" style="border-color: #ffb4ab; color: #ffb4ab; background-color: rgba(255, 180, 171, 0.1);">
+<div class="status-dot bg-error"></div>
+                                        ERROR
+                                    </div>
+</td>
+<td class="py-3 px-4 text-right flex justify-end gap-1">
+<button class="p-1.5 text-on-surface-variant hover:text-primary-fixed transition-colors rounded hover:bg-surface-container-highest" title="View Logs">
+<span class="material-symbols-outlined text-[18px]">plagiarism</span>
+</button>
+<button class="p-1.5 text-on-surface-variant hover:text-primary-fixed transition-colors rounded hover:bg-surface-container-highest" title="Refresh">
+<span class="material-symbols-outlined text-[18px]">refresh</span>
+</button>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="border-b border-outline-variant/10 table-row-zebra">
+<td class="py-3 px-4">
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-primary-fixed"></div>
+<span class="text-on-surface font-semibold font-body-sm">Feodo Tracker Botnet C2</span>
+</div>
+</td>
+<td class="py-3 px-4 text-on-surface-variant text-xs truncate max-w-[200px]">https://feodotracker.abuse...</td>
+<td class="py-3 px-4">
+<span class="bg-surface-container-high px-2 py-1 rounded text-xs border border-outline-variant/30 text-on-surface">CSV</span>
+</td>
+<td class="py-3 px-4 text-on-surface-variant">1h ago</td>
+<td class="py-3 px-4 text-primary-fixed">342</td>
+<td class="py-3 px-4">
+<div class="status-badge px-2 py-0.5 rounded-full text-[10px] font-label-caps tracking-wider" style="border-color: #74f5ff; color: #74f5ff; background-color: rgba(116, 245, 255, 0.1);">
+<div class="status-dot bg-primary-fixed"></div>
+                                        ACTIVE
+                                    </div>
+</td>
+<td class="py-3 px-4 text-right flex justify-end gap-1">
+<button class="p-1.5 text-on-surface-variant hover:text-primary-fixed transition-colors rounded hover:bg-surface-container-highest" title="View">
+<span class="material-symbols-outlined text-[18px]">visibility</span>
+</button>
+<button class="p-1.5 text-on-surface-variant hover:text-primary-fixed transition-colors rounded hover:bg-surface-container-highest" title="Process">
+<span class="material-symbols-outlined text-[18px]">play_arrow</span>
+</button>
+<button class="p-1.5 text-on-surface-variant hover:text-primary-fixed transition-colors rounded hover:bg-surface-container-highest" title="Refresh">
+<span class="material-symbols-outlined text-[18px]">refresh</span>
+</button>
+<button class="p-1.5 text-on-surface-variant hover:text-error transition-colors rounded hover:bg-error/10" title="Delete">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+</button>
+</td>
+</tr>
+<!-- Row 4 (Inactive) -->
+<tr class="border-b border-outline-variant/10 table-row-zebra">
+<td class="py-3 px-4">
+<div class="flex items-center gap-2 opacity-50">
+<div class="w-2 h-2 rounded-full bg-outline-variant"></div>
+<span class="text-on-surface font-semibold font-body-sm">Custom Internal Blacklist</span>
+</div>
+</td>
+<td class="py-3 px-4 text-on-surface-variant text-xs opacity-50">file://opt/tia/feeds/internal...</td>
+<td class="py-3 px-4 opacity-50">
+<span class="bg-surface-container-high px-2 py-1 rounded text-xs border border-outline-variant/30 text-on-surface">STIX</span>
+</td>
+<td class="py-3 px-4 text-on-surface-variant opacity-50">5d ago</td>
+<td class="py-3 px-4 text-on-surface-variant opacity-50">12</td>
+<td class="py-3 px-4">
+<div class="status-badge px-2 py-0.5 rounded-full text-[10px] font-label-caps tracking-wider" style="border-color: #849495; color: #849495; background-color: rgba(132, 148, 149, 0.1);">
+<div class="status-dot bg-outline"></div>
+                                        INACTIVE
+                                    </div>
+</td>
+<td class="py-3 px-4 text-right flex justify-end gap-1">
+<button class="p-1.5 text-on-surface-variant hover:text-primary-fixed transition-colors rounded hover:bg-surface-container-highest" title="Enable">
+<span class="material-symbols-outlined text-[18px]">power_settings_new</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Pagination -->
+<div class="p-4 border-t border-outline-variant/20 flex items-center justify-between bg-surface-container-lowest/30 rounded-b-xl">
+<span class="text-body-sm text-on-surface-variant font-data-mono">Showing 1 to 4 of 124 entries</span>
+<div class="flex items-center gap-1">
+<button class="btn-glass w-8 h-8 flex items-center justify-center rounded disabled:opacity-50" disabled="">
+<span class="material-symbols-outlined text-[18px]">chevron_left</span>
+</button>
+<button class="w-8 h-8 flex items-center justify-center rounded bg-primary-fixed/20 text-primary-fixed border border-primary-fixed/50 font-data-mono text-sm">1</button>
+<button class="btn-glass w-8 h-8 flex items-center justify-center rounded font-data-mono text-sm">2</button>
+<button class="btn-glass w-8 h-8 flex items-center justify-center rounded font-data-mono text-sm">3</button>
+<span class="text-on-surface-variant px-1">...</span>
+<button class="btn-glass w-8 h-8 flex items-center justify-center rounded font-data-mono text-sm">13</button>
+<button class="btn-glass w-8 h-8 flex items-center justify-center rounded">
+<span class="material-symbols-outlined text-[18px]">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- 'Add Feed' Modal Overlay (Hidden by default, shown via inline script for demo) -->
+<div class="fixed inset-0 z-[100] flex items-center justify-center bg-background/80 backdrop-blur-sm hidden p-4" id="add-feed-modal">
+<div class="glass-modal w-full max-w-2xl rounded-2xl flex flex-col relative overflow-hidden">
+<!-- Decorative header glow -->
+<div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary-fixed to-transparent opacity-50"></div>
+<div class="px-6 py-4 border-b border-outline-variant/20 flex justify-between items-center bg-surface-container/30">
+<h3 class="font-headline-md text-headline-md text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-fixed">add_link</span>
+                    Add New Intelligence Feed
+                </h3>
+<button class="text-on-surface-variant hover:text-error transition-colors p-1" onclick="document.getElementById('add-feed-modal').classList.add('hidden'); document.getElementById('add-feed-modal').classList.remove('flex');">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+<div class="p-6 space-y-6">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="space-y-1">
+<label class="font-label-caps text-label-caps text-on-surface-variant">FEED NAME <span class="text-primary-fixed">*</span></label>
+<input class="input-glass w-full px-3 py-2 text-body-sm font-data-mono rounded-t-sm" placeholder="e.g., CISA Known Exploited" type="text"/>
+</div>
+<div class="space-y-1">
+<label class="font-label-caps text-label-caps text-on-surface-variant">CATEGORY</label>
+<select class="input-glass w-full px-3 py-2 text-body-sm font-data-mono rounded-t-sm appearance-none">
+<option value="ip">IP Reputation</option>
+<option value="domain">Malicious Domains</option>
+<option value="hash">File Hashes</option>
+<option value="vulnerability">Vulnerabilities</option>
+<option value="mixed">Mixed / All</option>
+</select>
+</div>
+</div>
+<div class="space-y-1">
+<label class="font-label-caps text-label-caps text-on-surface-variant">SOURCE (URL / FILE PATH) <span class="text-primary-fixed">*</span></label>
+<div class="flex items-center">
+<span class="bg-surface-container border-y border-l border-outline-variant/30 px-3 py-2 text-on-surface-variant font-data-mono text-sm rounded-tl-sm rounded-bl-sm">URI</span>
+<input class="input-glass w-full px-3 py-2 text-body-sm font-data-mono border-l-0" placeholder="https://..." type="text"/>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="space-y-1">
+<label class="font-label-caps text-label-caps text-on-surface-variant">DATA FORMAT <span class="text-primary-fixed">*</span></label>
+<div class="flex gap-2">
+<label class="flex-1 border border-primary-fixed/50 bg-primary-fixed/10 rounded p-2 flex items-center justify-center gap-2 cursor-pointer transition-colors">
+<input checked="" class="hidden" name="format" type="radio" value="json"/>
+<span class="font-label-caps text-label-caps text-primary-fixed">JSON</span>
+</label>
+<label class="flex-1 border border-outline-variant/30 hover:border-outline-variant bg-surface-container/30 rounded p-2 flex items-center justify-center gap-2 cursor-pointer transition-colors">
+<input class="hidden" name="format" type="radio" value="csv"/>
+<span class="font-label-caps text-label-caps text-on-surface-variant">CSV</span>
+</label>
+<label class="flex-1 border border-outline-variant/30 hover:border-outline-variant bg-surface-container/30 rounded p-2 flex items-center justify-center gap-2 cursor-pointer transition-colors">
+<input class="hidden" name="format" type="radio" value="stix"/>
+<span class="font-label-caps text-label-caps text-on-surface-variant">STIX</span>
+</label>
+</div>
+</div>
+<div class="space-y-1">
+<label class="font-label-caps text-label-caps text-on-surface-variant">POLLING INTERVAL</label>
+<select class="input-glass w-full px-3 py-2 text-body-sm font-data-mono rounded-t-sm appearance-none">
+<option value="15m">Every 15 Minutes</option>
+<option value="1h">Hourly</option>
+<option value="12h">Every 12 Hours</option>
+<option value="24h">Daily</option>
+<option value="manual">Manual Only</option>
+</select>
+</div>
+</div>
+<div class="space-y-1">
+<label class="font-label-caps text-label-caps text-on-surface-variant">DESCRIPTION (OPTIONAL)</label>
+<textarea class="input-glass w-full px-3 py-2 text-body-sm font-body-sm rounded-t-sm h-20 resize-none" placeholder="Notes about this intelligence source..."></textarea>
+</div>
+</div>
+<div class="px-6 py-4 border-t border-outline-variant/20 bg-surface-container/50 flex justify-end gap-3 rounded-b-2xl">
+<button class="btn-glass px-4 py-2 rounded-lg font-label-caps text-label-caps" onclick="document.getElementById('add-feed-modal').classList.add('hidden'); document.getElementById('add-feed-modal').classList.remove('flex');">CANCEL</button>
+<button class="btn-primary px-6 py-2 rounded-lg font-label-caps text-label-caps font-bold flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">cloud_sync</span>
+                    CONNECT FEED
+                </button>
+</div>
+</div>
+</div>
+</body></html>

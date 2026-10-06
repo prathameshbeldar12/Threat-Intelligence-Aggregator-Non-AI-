@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Threat Intelligence Aggregator - Secure Login</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-fixed-dim": "#adc6ff",
+                        "primary-fixed": "#74f5ff",
+                        "surface-container-lowest": "#0d0e13",
+                        "on-surface": "#e3e1e9",
+                        "outline-variant": "#3a494b",
+                        "secondary": "#adc6ff",
+                        "on-secondary-container": "#e6ecff",
+                        "tertiary-fixed": "#e9ddff",
+                        "secondary-fixed": "#d8e2ff",
+                        "on-secondary-fixed": "#001a42",
+                        "on-primary": "#00363a",
+                        "on-error": "#690005",
+                        "on-tertiary-fixed": "#23005c",
+                        "on-secondary-fixed-variant": "#004395",
+                        "tertiary-container": "#e2d4ff",
+                        "on-secondary": "#002e6a",
+                        "primary-container": "#00f2ff",
+                        "on-primary-fixed-variant": "#004f54",
+                        "on-tertiary-container": "#6f3cd8",
+                        "surface": "#121318",
+                        "error-container": "#93000a",
+                        "inverse-primary": "#00696f",
+                        "primary-fixed-dim": "#00dbe7",
+                        "on-surface-variant": "#b9cacb",
+                        "on-background": "#e3e1e9",
+                        "on-tertiary": "#3c0091",
+                        "error": "#ffb4ab",
+                        "secondary-container": "#0566d9",
+                        "on-primary-container": "#006a71",
+                        "surface-bright": "#38393f",
+                        "surface-container-highest": "#34343a",
+                        "surface-variant": "#34343a",
+                        "outline": "#849495",
+                        "inverse-surface": "#e3e1e9",
+                        "tertiary": "#fcf5ff",
+                        "surface-dim": "#121318",
+                        "tertiary-fixed-dim": "#d0bcff",
+                        "surface-container": "#1e1f25",
+                        "background": "#121318",
+                        "surface-container-high": "#292a2f",
+                        "on-primary-fixed": "#002022",
+                        "on-tertiary-fixed-variant": "#5516be",
+                        "surface-tint": "#00dbe7",
+                        "on-error-container": "#ffdad6",
+                        "inverse-on-surface": "#2f3036",
+                        "surface-container-low": "#1a1b21",
+                        "primary": "#e1fdff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "container-padding": "24px",
+                        "unit": "4px",
+                        "gutter": "16px",
+                        "stack-sm": "8px",
+                        "stack-md": "16px",
+                        "stack-lg": "32px"
+                    },
+                    "fontFamily": {
+                        "label-caps": ["JetBrains Mono", "monospace"],
+                        "data-mono": ["JetBrains Mono", "monospace"],
+                        "display-lg": ["Inter", "sans-serif"],
+                        "body-md": ["Inter", "sans-serif"],
+                        "headline-lg": ["Inter", "sans-serif"],
+                        "body-sm": ["Inter", "sans-serif"],
+                        "headline-md": ["Inter", "sans-serif"],
+                        "body-lg": ["Inter", "sans-serif"]
+                    },
+                    "fontSize": {
+                        "label-caps": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700" }],
+                        "data-mono": ["14px", { "lineHeight": "20px", "fontWeight": "500" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        /* Base Void/Network Background */
+        body {
+            background-color: #050507; /* Level 0 Void */
+            background-image: 
+                radial-gradient(circle at 50% 0%, rgba(116, 245, 255, 0.08) 0%, transparent 60%),
+                linear-gradient(rgba(58, 73, 75, 0.2) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(58, 73, 75, 0.2) 1px, transparent 1px);
+            background-size: 100% 100%, 40px 40px, 40px 40px;
+            background-position: center top, center center, center center;
+            background-attachment: fixed;
+        }
+
+        /* Input specific focus styling per guidance */
+        .soc-input {
+            border: 1px solid transparent;
+            border-bottom-color: #3a494b; /* outline-variant */
+            background-color: transparent;
+            transition: all 0.3s ease;
+        }
+        
+        .soc-input:focus {
+            border-color: #74f5ff; /* primary-fixed */
+            background-color: rgba(30, 41, 59, 0.2);
+            box-shadow: inset 0 0 10px rgba(116, 245, 255, 0.05);
+            border-radius: 0.125rem;
+        }
+
+        /* Keyframe for glowing logo */
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 15px rgba(116,245,255,0.1); }
+            50% { box-shadow: 0 0 25px rgba(116,245,255,0.3); }
+        }
+        .animate-pulse-glow {
+            animation: pulse-glow 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+    </style>
+</head>
+<body class="min-h-screen w-full flex items-center justify-center p-4 text-on-surface font-body-md antialiased overflow-hidden">
+<!-- Atmospheric Overlay -->
+<div class="fixed inset-0 pointer-events-none z-0 bg-gradient-to-b from-transparent via-background/50 to-background"></div>
+<!-- Login Container (Glassmorphism Level 2) -->
+<main class="relative z-10 w-full max-w-md p-container-padding sm:p-10 bg-surface-container-low/40 backdrop-blur-xl border border-outline-variant/30 rounded-xl shadow-2xl flex flex-col gap-stack-lg">
+<!-- Header -->
+<header class="text-center flex flex-col items-center gap-stack-sm">
+<div class="w-16 h-16 rounded-full bg-surface-container-highest/50 border border-primary-fixed/30 flex items-center justify-center animate-pulse-glow mb-2">
+<span class="material-symbols-outlined text-[32px] text-primary-fixed" style="font-variation-settings: 'FILL' 1;">security</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight">TIA Node Auth</h1>
+<p class="font-body-sm text-body-sm text-on-surface-variant font-data-mono">Secure Access Terminal v2.4</p>
+</header>
+<!-- Login Form -->
+<form class="flex flex-col gap-stack-md" id="auth-form" novalidate="">
+<!-- Operator ID (Email) -->
+<div class="flex flex-col gap-unit relative">
+<label class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider pl-1" for="operator-id">Operator ID</label>
+<div class="relative group">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline-variant group-focus-within:text-primary-fixed transition-colors">badge</span>
+<input autocomplete="email" class="soc-input w-full pl-10 pr-4 py-3 font-data-mono text-data-mono text-on-surface placeholder:text-outline outline-none" id="operator-id" name="operatorId" placeholder="analyst.id@soc.local" required="" type="email"/>
+</div>
+<div class="h-4 flex items-center">
+<span class="hidden text-error font-body-sm text-[12px] flex items-center gap-1" id="id-error">
+<span class="material-symbols-outlined text-[14px]">error</span> Invalid identifier format
+                    </span>
+</div>
+</div>
+<!-- Passkey (Password) -->
+<div class="flex flex-col gap-unit relative">
+<label class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider pl-1" for="passkey">Passkey</label>
+<div class="relative group">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline-variant group-focus-within:text-primary-fixed transition-colors">key</span>
+<input autocomplete="current-password" class="soc-input w-full pl-10 pr-12 py-3 font-data-mono text-data-mono text-on-surface placeholder:text-outline outline-none" id="passkey" name="passkey" placeholder="••••••••••••" required="" type="password"/>
+<button aria-label="Toggle password visibility" class="absolute right-3 top-1/2 -translate-y-1/2 text-outline-variant hover:text-primary-fixed transition-colors focus:outline-none flex items-center justify-center" id="toggle-password" type="button">
+<span class="material-symbols-outlined text-[20px]" id="toggle-icon">visibility</span>
+</button>
+</div>
+<div class="h-4 flex items-center">
+<span class="hidden text-error font-body-sm text-[12px] flex items-center gap-1" id="passkey-error">
+<span class="material-symbols-outlined text-[14px]">error</span> Authentication key required
+                    </span>
+</div>
+</div>
+<!-- Auxiliary Actions -->
+<div class="flex items-center justify-between mt-2">
+<label class="flex items-center gap-2 cursor-pointer group">
+<div class="relative flex items-center justify-center w-4 h-4">
+<input class="peer appearance-none w-4 h-4 border border-outline-variant rounded-sm bg-surface-container-lowest checked:bg-primary-fixed checked:border-primary-fixed transition-colors cursor-pointer outline-none focus-visible:ring-2 ring-primary-fixed ring-offset-1 ring-offset-background" type="checkbox"/>
+<span class="material-symbols-outlined text-on-primary-fixed text-[14px] absolute pointer-events-none opacity-0 peer-checked:opacity-100 font-bold" style="font-variation-settings: 'FILL' 1;">check</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant group-hover:text-on-surface transition-colors select-none">Maintain link</span>
+</label>
+<a class="font-label-caps text-label-caps text-outline-variant hover:text-primary-fixed transition-colors uppercase outline-none focus-visible:text-primary-fixed focus-visible:underline underline-offset-4" href="#">
+                    Reset Protocol
+                </a>
+</div>
+<!-- Submit Action -->
+<button class="relative w-full py-4 mt-4 rounded-DEFAULT overflow-hidden group flex items-center justify-center transition-all border border-transparent focus:outline-none focus-visible:ring-2 ring-primary-fixed ring-offset-2 ring-offset-background" id="submit-btn" type="submit">
+<!-- Button Background Gradient -->
+<div class="absolute inset-0 bg-gradient-to-r from-primary-fixed to-secondary-fixed opacity-90 group-hover:opacity-100 transition-opacity"></div>
+<!-- Glowing Border Effect on Hover/Active -->
+<div class="absolute inset-0 border border-primary-fixed opacity-0 group-hover:opacity-100 group-hover:shadow-[0_0_20px_rgba(116,245,255,0.4)] transition-all rounded-DEFAULT pointer-events-none"></div>
+<!-- Default State Content -->
+<div class="relative z-10 flex items-center gap-2 text-on-primary-fixed font-label-caps text-label-caps font-bold uppercase tracking-widest" id="btn-content-default">
+                    Initialize Connection <span class="material-symbols-outlined text-[18px]">login</span>
+</div>
+<!-- Loading State Content -->
+<div class="relative z-10 hidden flex items-center gap-2 text-on-primary-fixed font-label-caps text-label-caps font-bold uppercase tracking-widest" id="btn-content-loading">
+                    Verifying Credentials <span class="material-symbols-outlined text-[18px] animate-spin">progress_activity</span>
+</div>
+</button>
+</form>
+<!-- Security Badge Subtext -->
+<div class="mt-6 border-t border-outline-variant/20 pt-4 flex items-center justify-center gap-2 text-outline-variant/60">
+<span class="material-symbols-outlined text-[16px]">encrypted</span>
+<span class="font-data-mono text-[11px] uppercase tracking-wider">End-to-End Encrypted Tunnel</span>
+</div>
+</main>
+<script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('auth-form');
+            const operatorIdInput = document.getElementById('operator-id');
+            const passkeyInput = document.getElementById('passkey');
+            const idError = document.getElementById('id-error');
+            const passkeyError = document.getElementById('passkey-error');
+            const togglePasswordBtn = document.getElementById('toggle-password');
+            const toggleIcon = document.getElementById('toggle-icon');
+            const btnDefault = document.getElementById('btn-content-default');
+            const btnLoading = document.getElementById('btn-content-loading');
+            const submitBtn = document.getElementById('submit-btn');
+
+            // Password Visibility Toggle
+            togglePasswordBtn.addEventListener('click', () => {
+                const type = passkeyInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passkeyInput.setAttribute('type', type);
+                toggleIcon.textContent = type === 'password' ? 'visibility' : 'visibility_off';
+                
+                // Keep focus on input after toggle for better UX
+                passkeyInput.focus();
+            });
+
+            // Form Validation and Submission Simulation
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                let isValid = true;
+
+                // Reset Errors
+                idError.classList.add('hidden');
+                passkeyError.classList.add('hidden');
+                operatorIdInput.classList.remove('border-error', 'text-error');
+                passkeyInput.classList.remove('border-error', 'text-error');
+
+                // Basic Validation
+                if (!operatorIdInput.value || !operatorIdInput.value.includes('@')) {
+                    idError.classList.remove('hidden');
+                    // Override focus style for error
+                    operatorIdInput.style.borderColor = '#ffb4ab';
+                    isValid = false;
+                } else {
+                    operatorIdInput.style.borderColor = ''; // reset inline style
+                }
+
+                if (!passkeyInput.value || passkeyInput.value.length < 4) {
+                    passkeyError.classList.remove('hidden');
+                    passkeyInput.style.borderColor = '#ffb4ab';
+                    isValid = false;
+                } else {
+                    passkeyInput.style.borderColor = '';
+                }
+
+                // Simulate Network Request
+                if (isValid) {
+                    // UI Loading State
+                    btnDefault.classList.add('hidden');
+                    btnLoading.classList.remove('hidden');
+                    submitBtn.classList.add('cursor-wait', 'opacity-90');
+                    operatorIdInput.disabled = true;
+                    passkeyInput.disabled = true;
+
+                    // Fake delay
+                    setTimeout(() => {
+                        // Reset UI (Simulating success/redirect in a real app)
+                        btnDefault.classList.remove('hidden');
+                        btnLoading.classList.add('hidden');
+                        submitBtn.classList.remove('cursor-wait', 'opacity-90');
+                        operatorIdInput.disabled = false;
+                        passkeyInput.disabled = false;
+                        
+                        // Flash success (optional UX enhancement)
+                        submitBtn.querySelector('.absolute.inset-0.bg-gradient-to-r').classList.replace('from-primary-fixed', 'from-[#00ff88]');
+                        setTimeout(() => {
+                            submitBtn.querySelector('.absolute.inset-0.bg-gradient-to-r').classList.replace('from-[#00ff88]', 'from-primary-fixed');
+                            passkeyInput.value = ''; // Clear password on 'success'
+                        }, 1000);
+
+                    }, 2000);
+                }
+            });
+
+            // Clear errors on input
+            operatorIdInput.addEventListener('input', () => {
+                idError.classList.add('hidden');
+                operatorIdInput.style.borderColor = '';
+            });
+
+            passkeyInput.addEventListener('input', () => {
+                passkeyError.classList.add('hidden');
+                passkeyInput.style.borderColor = '';
+            });
+        });
+    </script>
+</body></html>
