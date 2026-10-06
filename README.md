@@ -1,224 +1,663 @@
-# Threat Intelligence Aggregator (Non-AI)
+# 🛡️ ThreatShield Intelligence Aggregator
 
-A web-based cybersecurity threat intelligence aggregation, normalization, and Indicator of Compromise (IOC) correlation platform. Designed for high-stakes Security Operations Centers (SOC), this platform enables analysts to ingest local or remote intelligence feeds, detect and validate indicators, remove duplicates, compute deterministic risk scores, and compile blocklists or reports.
+## Cyber Threat Intelligence, IOC Aggregation & Correlation Platform
 
----
+ThreatShield Intelligence Aggregator is a **Django-based Cyber Threat Intelligence (CTI) platform** designed to collect, normalize, store, analyze, and correlate **Indicators of Compromise (IOCs)** from external threat intelligence sources.
 
-## 1. Project Description
-The Threat Intelligence Aggregator is a rule-based, deterministic defense platform built using Django. It acts as a centralized repository for collecting cyber threat indicators, identifying feed intersections, calculating threat severity without using black-box machine learning models, and generating export lists for network protection systems.
-
-## 2. Features
-- **Feed Import Pipeline:** Standardized parsing of CSV, JSON (including STIX objects), and TXT formats. Handles remote URL feeds or manual file uploads.
-- **Auto-Extraction & Validation:** Automatically identifies IPv4 addresses, domain names, URLs, file hashes (MD5, SHA-1, SHA-256), and email addresses using standard Python libraries.
-- **Normalization Engine:** Canonicalizes strings (whitespace trimming, case normalization, URL scheme/host pruning) to match and aggregate duplicates.
-- **Cross-Feed Correlation:** Tracks indicator overlaps across multiple discrete intel feeds to identify high-confidence threats.
-- **Deterministic Risk Engine:** Purely rule-based scoring (0-100) and severity assignment (Low, Medium, High, Critical) based on configuration heuristics.
-- **Blocklist Generator:** Targeted search and query utility exporting IP, domain, URL, or hash blocklists in CSV, JSON, or plain TXT format.
-- **Operational Reports:** Compiles operational and executive threat statistics, top threats list, and export reviews.
-- **Activity Logging:** Session login/logout tracking, feed configurations, rejections, processing history, and correlation actions recorded to the database.
-- **Secure Authentication:** User registration, password hashing, and session management using Django's built-in authentication system.
+The platform provides a centralized dashboard where security analysts can manage threat intelligence feeds, process IOC data, identify repeated indicators across multiple sources, synchronize vulnerability intelligence, and review security-related activity.
 
 ---
 
-## 3. Technology Stack
-- **Backend Framework:** Python, Django, Django REST Framework
-- **Data Manipulation:** pandas
-- **HTTP client:** requests
-- **Database Engine:** SQLite (configured for seamless migration to PostgreSQL)
-- **Frontend Layer:** Tailwind CSS (Sentinel Modern Theme configuration), Google Fonts (Inter, JetBrains Mono), Material Symbols, Chart.js
+# 🔎 Project Overview
+
+ThreatShield is a centralized **Cyber Threat Intelligence Aggregation and Correlation Platform**.
+
+Security teams receive threat intelligence from many different sources. These sources may contain:
+
+* Malicious IP addresses
+* Malicious domains
+* Suspicious URLs
+* File hashes
+* Email indicators
+* Other indicators associated with malicious activity
+
+Handling these feeds manually can be difficult.
+
+ThreatShield provides a centralized system that can:
+
+1. Register threat intelligence feeds.
+2. Retrieve feed data.
+3. Parse different feed formats.
+4. Detect IOC types.
+5. Normalize IOC values.
+6. Store indicators in a database.
+7. Link indicators to their sources.
+8. Identify indicators appearing in multiple feeds.
+9. Calculate and maintain threat-related metadata.
+10. Display intelligence through a security dashboard.
+11. Synchronize CISA Known Exploited Vulnerabilities.
+12. Maintain activity logs for important system operations.
 
 ---
 
-## 4. Project Structure
+# 🎯 Why This Project Was Developed
+
+Traditional threat intelligence collection can become fragmented when analysts manually check multiple websites, files, and feeds.
+
+ThreatShield was developed to provide a **single centralized location** for collecting and analyzing threat intelligence.
+
+Instead of:
+
+```text
+Feed 1 → Manual checking
+Feed 2 → Manual checking
+Feed 3 → Manual checking
+CISA  → Manual checking
+        ↓
+     Analyst
 ```
+
+ThreatShield provides:
+
+```text
+       Threat Intelligence Sources
+          ↓       ↓       ↓
+       Feed 1   Feed 2   Feed 3
+          \       |       /
+           \      |      /
+            ↓     ↓     ↓
+       ThreatShield
+            ↓
+       Feed Parser
+            ↓
+       IOC Detection
+            ↓
+       IOC Database
+            ↓
+    Correlation Engine
+            ↓
+        Dashboard
+            ↓
+      Security Analyst
+```
+
+
+
+# 🏗️ System Architecture
+
+```text
+                    ┌─────────────────────────┐
+                    │ External CTI Sources    │
+                    │                         │
+                    │ TXT / CSV / JSON / STIX│
+                    └────────────┬────────────┘
+                                 │
+                                 ▼
+                    ┌─────────────────────────┐
+                    │    Feed Management      │
+                    └────────────┬────────────┘
+                                 │
+                                 ▼
+                    ┌─────────────────────────┐
+                    │      Feed Fetcher       │
+                    │                         │
+                    │ URL validation          │
+                    │ HTTPS/HTTP retrieval    │
+                    │ Size validation         │
+                    └────────────┬────────────┘
+                                 │
+                                 ▼
+                    ┌─────────────────────────┐
+                    │      Feed Parser        │
+                    │                         │
+                    │ TXT / CSV / JSON        │
+                    └────────────┬────────────┘
+                                 │
+                                 ▼
+                    ┌─────────────────────────┐
+                    │      IOC Detection      │
+                    │                         │
+                    │ IPv4 / IPv6             │
+                    │ Domain / URL            │
+                    │ MD5 / SHA1 / SHA256     │
+                    │ Email                   │
+                    └────────────┬────────────┘
+                                 │
+                                 ▼
+                    ┌─────────────────────────┐
+                    │      IOC Database       │
+                    └────────────┬────────────┘
+                                 │
+                       ┌─────────┴─────────┐
+                       ▼                   ▼
+             ┌─────────────────┐  ┌──────────────────┐
+             │ IOC Correlation │  │ CISA KEV Catalog │
+             └────────┬────────┘  └────────┬─────────┘
+                      │                    │
+                      └─────────┬──────────┘
+                                ▼
+                    ┌─────────────────────────┐
+                    │ Security Dashboard      │
+                    │                         │
+                    │ Feeds                   │
+                    │ IOCs                    │
+                    │ Correlation              │
+                    │ Vulnerabilities         │
+                    │ Activity Logs           │
+                    │ Reports                 │
+                    └─────────────────────────┘
+```
+
+---
+
+
+# 🔢 Supported IOC Types
+
+ThreatShield currently supports the following IOC types:
+
+| IOC Type | Description          |
+| -------- | -------------------- |
+| IPv4     | IPv4 network address |
+| IPv6     | IPv6 network address |
+| Domain   | Domain name          |
+| URL      | Web URL              |
+| MD5      | MD5 file hash        |
+| SHA1     | SHA-1 file hash      |
+| SHA256   | SHA-256 file hash    |
+| Email    | Email address        |
+
+The system detects the IOC type automatically when the feed does not explicitly provide the type.
+
+---
+
+
+# ⚠️ Severity and Risk Information
+
+IOC records contain metadata such as:
+
+* Severity
+* Risk score
+* Status
+* First seen
+* Last seen
+
+The current prototype uses rule-based/default classification for imported IOC data.
+
+Typical severity levels include:
+
+```text
+Low
+Medium
+High
+Critical
+```
+
+The severity model is intended to help analysts prioritize investigation.
+
+---
+
+
+
+# 🗂️ Project Structure
+
+The main project follows a Django application structure.
+
+```text
 stitch_threatshield_intelligence_aggregator/
 │
 ├── manage.py
-├── requirements.txt
-├── README.md
 │
-├── threatintel/
-│   ├── __init__.py
-│   ├── settings.py
+├── aggregator/
+│   │
+│   ├── models.py
+│   ├── forms.py
+│   ├── views.py
 │   ├── urls.py
-│   ├── wsgi.py
-│   └── asgi.py
+│   ├── admin.py
+│   │
+│   ├── services/
+│   │   ├── feed_fetcher.py
+│   │   └── feed_parser.py
+│   │
+│   ├── management/
+│   │   └── commands/
+│   │       └── process_active_feed.py
+│   │
+│   ├── migrations/
+│   │
+│   └── templates/
 │
-└── aggregator/
-    ├── __init__.py
-    ├── admin.py
-    ├── apps.py
-    ├── models.py
-    ├── views.py
-    ├── urls.py
-    ├── serializers.py
-    ├── forms.py
-    ├── tests.py
-    │
-    ├── services/
-    │   ├── __init__.py
-    │   ├── validator.py
-    │   ├── normalizer.py
-    │   ├── ioc_parser.py
-    │   ├── feed_parser.py
-    │   ├── feed_fetcher.py
-    │   ├── risk_engine.py
-    │   ├── correlation.py
-    │   ├── blocklist.py
-    │   └── reporting.py
-    │
-    ├── templates/
-    │   └── aggregator/
-    │       ├── base.html
-    │       ├── login.html
-    │       ├── register.html
-    │       ├── dashboard.html
-    │       ├── feed_management.html
-    │       ├── ioc_explorer.html
-    │       ├── correlation.html
-    │       ├── blocklists.html
-    │       ├── reports.html
-    │       └── activity_logs.html
-    │
-    └── management/
-        ├── __init__.py
-        └── commands/
-            ├── __init__.py
-            └── seed_demo_data.py
+├── static/
+│
+├── templates/
+│
+├── requirements.txt
+│
+├── .gitignore
+│
+├── .env.example
+│
+└── README.md
 ```
 
 ---
 
-## 5. Installation & Setup
+# 🧠 Important Backend Components
 
-### Prerequisites
-- Python 3.10 or higher
-- pip (Python package installer)
+## `aggregator/models.py`
 
-### Step 1: Virtual Environment Setup
-Clone the repository, open a terminal in the project directory, and initialize a virtual environment:
-```bash
-# Create virtual environment
-python -m venv venv
+Defines the primary database models.
 
-# Activate on Windows (PowerShell/CMD)
-.\venv\Scripts\activate
+Important models include:
 
-# Activate on Linux/Mac
-source venv/bin/activate
+### Feed
+
+Stores threat intelligence feed information.
+
+### IOC
+
+Stores normalized indicators.
+
+### IOCSource
+
+Connects IOCs to their source feeds.
+
+### CorrelationResult
+
+Stores correlation-related information.
+
+### Vulnerability
+
+Stores CISA KEV vulnerability information.
+
+### ActivityLog
+
+Stores important system activity.
+
+---
+
+## `aggregator/forms.py`
+
+Contains forms used by the web interface.
+
+The `FeedForm` handles:
+
+* Feed name
+* Source
+* Feed type
+* Category
+* Description
+* URL
+* File upload
+
+---
+
+## `aggregator/services/feed_fetcher.py`
+
+Responsible for secure retrieval of remote feeds.
+
+Responsibilities include:
+
+* URL validation
+* HTTP/HTTPS validation
+* Private/local destination protection
+* Redirect handling
+* Response validation
+* Maximum feed size validation
+* Empty response validation
+
+---
+
+## `aggregator/services/feed_parser.py`
+
+Responsible for parsing feed content.
+
+Supported:
+
+```text
+TXT
+CSV
+JSON
+STIX-style JSON
 ```
 
-### Step 2: Install Dependencies
+It also performs IOC type detection and normalization.
+
+---
+
+## `aggregator/management/commands/process_active_feed.py`
+
+This Django management command processes active remote feeds.
+
+The workflow is:
+
+```text
+Find active URL feeds
+       ↓
+Fetch each feed
+       ↓
+Parse feed
+       ↓
+Process IOC records
+       ↓
+Update database
+       ↓
+Run correlation
+```
+
+---
+
+# 💻 Technology Stack
+
+## Backend
+
+* Python
+* Django
+
+## Database
+
+* SQLite for development/prototype use
+
+## Frontend
+
+* HTML
+* CSS
+* JavaScript
+* Django Templates
+
+## Threat Intelligence
+
+* External IOC feeds
+* CISA KEV
+
+## Data Formats
+
+* TXT
+* CSV
+* JSON
+* STIX-style JSON
+
+---
+
+# 🛠️ Installation
+
+## 1. Clone the repository
+
 ```bash
+git clone <YOUR-GITHUB-REPOSITORY-URL>
+```
+
+Example:
+
+```bash
+git clone https://github.com/YOUR_USERNAME/ThreatShield-Intelligence-Aggregator.git
+```
+
+Enter the project:
+
+```bash
+cd ThreatShield-Intelligence-Aggregator
+```
+
+---
+
+# 🐍 2. Create Virtual Environment
+
+Windows:
+
+```powershell
+python -m venv venv
+```
+
+Activate:
+
+```powershell
+.\venv\Scripts\Activate.ps1
+```
+
+If PowerShell blocks script execution, use the appropriate local PowerShell execution-policy configuration for your development environment.
+
+---
+
+# 📦 3. Install Dependencies
+
+```powershell
 pip install -r requirements.txt
 ```
 
-### Step 3: Database Migrations
-Initialize the SQLite database schema:
-```bash
-python manage.py makemigrations aggregator
+---
+
+# 🔍 4. Check Django Configuration
+
+```powershell
+python manage.py check
+```
+
+The command should complete without critical configuration errors.
+
+---
+
+# 🗄️ Database Setup
+
+Apply migrations:
+
+```powershell
 python manage.py migrate
 ```
 
-### Step 4: Load Demo Data
-Run the custom seed command to populate the database with 5 feeds, 55+ indicators, and activity logs:
-```bash
-python manage.py seed_demo_data
-```
-*Note: This command will print the created superuser credentials. Default Username: `analyst`, Password: `ThreatShield2026!`.*
+If model changes need migrations:
 
-### Step 5: Start Server
-Launch the development server:
-```bash
-python manage.py runserver
+```powershell
+python manage.py makemigrations
+python manage.py migrate
 ```
-Navigate to `http://127.0.0.1:8000/` in your web browser.
 
 ---
 
-## 6. Algorithms & Processing Workflows
+# 👤 Create Administrator
 
-### A. IOC Ingestion Workflow
-```
-[Ingest Trigger (URL/Upload)]
-             │
-             ▼
-      [Feed Parser] ──────────► [Validation Service]
-             │                          │
-             │ (Parsed Items)           ├─► (Invalid) ──► [Log Rejections]
-             ▼                          │
-    [Normalizer Service] ◄──────────────┴─► (Valid)
-             │
-             ▼
-    [Deduplication check] ──► [Insert / Update IOC Source]
+```powershell
+python manage.py createsuperuser
 ```
 
-### B. Correlation Engine
-For each active indicator:
-1. Queries the `IOCSource` link records.
-2. Counts the unique source feeds contributing the indicator.
-3. Sums total occurrences.
-4. Gathers threat categories associated with those feeds.
-5. Invokes the Risk Scoring Engine to compute an updated risk score and severity value.
-6. Saves updates and writes a `CorrelationResult` audit log.
+Enter:
 
-### C. Risk Scoring Rules
-Risk score is calculated deterministically on a scale of `0 - 100` using the following parameters:
-- **Base Overlap Score:**
-  - 1 feed = 20 points
-  - 2 feeds = 40 points
-  - 3 feeds = 60 points
-  - 4 feeds = 80 points
-  - 5+ feeds = 100 points
-- **Modifiers:**
-  - *Occurrences:* +2 points per occurrence (up to +15 pts).
-  - *Specificity:* +5 points for highly specific types (Hashes, URLs, Emails); +2 points for IPs and Domains.
-  - *Threat Categories:* +10 points if feed description/category contains critical terms (malware, phishing, botnet, ransomware).
-  - *Recency:* +10 points if observed within the last 24 hours.
-- **Score Cap:** Final score is capped at `100`.
-- **Severity Mapping:**
-  - `0 - 24`: Low
-  - `25 - 49`: Medium
-  - `50 - 74`: High
-  - `75 - 100`: Critical
+```text
+Username
+Email
+Password
+```
 
 ---
 
-## 7. API Documentation
+# ▶️ Running the Project
 
-All API endpoints are protected and require session authentication.
+Start the Django development server:
 
-| Endpoint | Method | Description |
-| :--- | :--- | :--- |
-| `/api/feeds/` | `GET`, `POST` | List and register threat intelligence feeds. |
-| `/api/iocs/` | `GET` | List unique active indicators. Supports query filtering: `?type=IPv4&severity=High&min_risk=50`. |
-| `/api/iocs/{id}/` | `GET` | Retrieve detail metrics and full feed overlap mapping for a specific indicator. |
-| `/api/correlation/` | `GET` | Retrieve calculated correlation result statistics. |
-| `/api/correlation/run/` | `POST` | Execute a manual correlation scoring pass. |
-| `/api/blocklists/generate/` | `POST` | Compile blocklist file contents. Parameters: `ioc_type`, `min_severity`, `min_risk_score`, `file_format`. |
-| `/api/reports/` | `GET` | Retrieve compiled statistics report for the dashboard. |
-| `/api/dashboard/stats/` | `GET` | Retrieve aggregated counters for SOC display panels. |
-
----
-
-## 8. Testing
-To run the automated tests verifying validators, normalizers, STIX parsers, and API responses:
-```bash
-python manage.py test
+```powershell
+python manage.py runserver 127.0.0.1:5000
 ```
 
-## 9. Security Considerations
-- **No Upload Executions:** Uploaded files are decoded strictly as UTF-8 textual streams and parsed via `csv.reader` or `json.loads` within standard Python memory space. No subprocesses are executed.
-- **CSRF Protection:** Integrated on all form templates to prevent cross-site request forgery.
-- **Input Validation:** Strict validation of IP boundaries, domain string limits, and hex pattern sizes rejects raw injections.
-- **ORM Boundaries:** All searches and filters utilize Django's DB ORM structure, preventing SQL injection vulnerabilities.
+Open:
 
-## 10. Future Enhancements
-- Integration of Taxi/Stix client for remote STIX-over-TAXII server ingestion.
-- Live webhook alerts for firewall rule automations.
-- IPv6 detection support.
+```text
+http://127.0.0.1:5000/
+```
 
 ---
 
-## 11. License
-This project is licensed under the MIT License - see the LICENSE file for details.
+
+# 🔐 Security Considerations
+
+Security is an important part of a threat intelligence platform.
+
+The project includes protections around remote feed retrieval.
+
+The feed fetcher:
+
+* Accepts HTTP/HTTPS URLs.
+* Validates destination addresses.
+* Blocks unsafe local/private destinations.
+* Does not automatically follow redirects.
+* Limits maximum response size.
+* Rejects empty feed responses.
+
+---
+
+# 🔑 Secrets and Credentials
+
+Never commit sensitive values to GitHub.
+
+Do not upload:
+
+```text
+.env
+API keys
+Passwords
+SMTP passwords
+Database credentials
+Private tokens
+Authentication secrets
+```
+
+Use environment variables instead.
+
+Example:
+
+```env
+SECRET_KEY=your-secret-key
+DEBUG=True
+
+OPENAI_API_KEY=your-api-key
+
+EMAIL_HOST_USER=your-email
+EMAIL_HOST_PASSWORD=your-password
+```
+
+Only placeholder values should be included in `.env.example`.
+
+---
+
+# 🚫 Files That Should Not Be Uploaded
+
+The following should normally be excluded using `.gitignore`:
+
+```text
+venv/
+.env
+db.sqlite3
+__pycache__/
+*.pyc
+staticfiles/
+media/
+```
+
+---
+
+# 🧪 Basic Testing
+
+Run Django checks:
+
+```powershell
+python manage.py check
+```
+
+Check migrations:
+
+```powershell
+python manage.py makemigrations --check
+```
+
+Compile Python code:
+
+```powershell
+python -m compileall .
+```
+
+Run the server:
+
+```powershell
+python manage.py runserver 127.0.0.1:5000
+```
+
+Process feeds:
+
+```powershell
+python manage.py process_active_feed
+```
+
+
+
+# 🔄 Complete Project Workflow
+
+The complete ThreatShield workflow can be represented as:
+
+```text
+                  ┌──────────────────┐
+                  │ Threat Sources   │
+                  └────────┬─────────┘
+                           │
+                           ▼
+                  ┌──────────────────┐
+                  │ Feed Management  │
+                  └────────┬─────────┘
+                           │
+                           ▼
+                  ┌──────────────────┐
+                  │ Feed Fetcher     │
+                  └────────┬─────────┘
+                           │
+                           ▼
+                  ┌──────────────────┐
+                  │ Feed Parser      │
+                  └────────┬─────────┘
+                           │
+                           ▼
+                  ┌──────────────────┐
+                  │ IOC Detection    │
+                  └────────┬─────────┘
+                           │
+                           ▼
+                  ┌──────────────────┐
+                  │ Normalization    │
+                  └────────┬─────────┘
+                           │
+                           ▼
+                  ┌──────────────────┐
+                  │ IOC Database     │
+                  └────────┬─────────┘
+                           │
+                  ┌────────┴─────────┐
+                  ▼                  ▼
+          ┌───────────────┐   ┌──────────────┐
+          │ IOC Correlation│   │ CISA KEV     │
+          └───────┬───────┘   └──────┬───────┘
+                  │                  │
+                  └────────┬─────────┘
+                           ▼
+                  ┌──────────────────┐
+                  │ Threat Dashboard │
+                  └────────┬─────────┘
+                           │
+                           ▼
+                  ┌──────────────────┐
+                  │ Security Analyst │
+                  └──────────────────┘
+
+
+# ⚠️ Disclaimer
+
+This project is intended for:
+
+* Educational purposes
+* Cybersecurity research
+* Controlled laboratory environments
+* Threat intelligence analysis
+* Defensive security operations
+
+The platform should not be used to perform unauthorized access, attack systems, or conduct malicious activity.
+
+Threat intelligence indicators should be treated as security data and should be validated before being used for blocking or automated response.
+
+---
+
