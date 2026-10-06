@@ -1,0 +1,533 @@
+{% extends 'aggregator/base.html' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<!-- Dashboard Header -->
+<div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+    <div>
+        <h2 class="font-headline-lg text-2xl font-bold text-primary-fixed">Security Operations Center Dashboard</h2>
+        <p class="text-sm text-on-surface-variant">Real-time indicators of compromise (IOC) correlation and telemetry analytics.</p>
+    </div>
+    <div class="flex gap-3">
+        <form action="{% url 'correlation' %}" method="POST">
+            {% csrf_token %}
+            <button type="submit" class="btn-primary px-4 py-2 rounded font-label-caps text-xs font-bold uppercase tracking-wider flex items-center gap-2">
+                <span class="material-symbols-outlined text-[16px]">sync</span>
+                Run Correlation
+            </button>
+        </form>
+        <a href="{% url 'feed_management' %}" class="btn-glass px-4 py-2 rounded font-label-caps text-xs font-bold uppercase tracking-wider flex items-center gap-2">
+            <span class="material-symbols-outlined text-[16px]">add</span>
+            Add Feed
+        </a>
+    </div>
+</div>
+
+<!-- Stats Counter Grid -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-gutter mb-6">
+    <!-- Feeds Count -->
+    <div class="glass-panel p-5 rounded-xl flex items-center justify-between">
+        <div>
+            <p class="font-label-caps text-[11px] text-on-surface-variant uppercase tracking-wider">Operational Feeds</p>
+            <h3 class="font-display-lg text-3xl font-black text-primary-fixed mt-1">{{ stats.feeds.active }} <span class="text-xs text-on-surface-variant font-normal">/ {{ stats.feeds.total }} Active</span></h3>
+        </div>
+        <div class="h-10 w-10 rounded bg-primary-fixed/10 flex items-center justify-center text-primary-fixed">
+            <span class="material-symbols-outlined">rss_feed</span>
+        </div>
+    </div>
+
+    <!-- Unique IOCs -->
+    <div class="glass-panel p-5 rounded-xl flex items-center justify-between">
+        <div>
+            <p class="font-label-caps text-[11px] text-on-surface-variant uppercase tracking-wider">Unique Indicators</p>
+            <h3 class="font-display-lg text-3xl font-black text-primary-fixed mt-1">{{ stats.iocs.unique_active }}</h3>
+        </div>
+        <div class="h-10 w-10 rounded bg-primary-fixed/10 flex items-center justify-center text-primary-fixed">
+            <span class="material-symbols-outlined">dataset</span>
+        </div>
+    </div>
+
+    <!-- Correlated Overlaps -->
+    <div class="glass-panel p-5 rounded-xl flex items-center justify-between">
+        <div>
+            <p class="font-label-caps text-[11px] text-on-surface-variant uppercase tracking-wider">Cross-Feed Correlated</p>
+            <h3 class="font-display-lg text-3xl font-black text-secondary-fixed-dim mt-1">{{ stats.iocs.correlated }}</h3>
+        </div>
+        <div class="h-10 w-10 rounded bg-secondary-fixed-dim/10 flex items-center justify-center text-secondary-fixed-dim">
+            <span class="material-symbols-outlined">hub</span>
+        </div>
+    </div>
+
+    <!-- Critical Threats -->
+    <div class="glass-panel p-5 rounded-xl flex items-center justify-between">
+        <div>
+            <p class="font-label-caps text-[11px] text-on-surface-variant uppercase tracking-wider">Critical Threats</p>
+            <h3 class="font-display-lg text-3xl font-black text-error mt-1">{{ stats.iocs.critical }} <span class="text-xs text-on-surface-variant font-normal">+ {{ stats.iocs.high }} High</span></h3>
+        </div>
+        <div class="h-10 w-10 rounded bg-error/10 flex items-center justify-center text-error">
+            <span class="material-symbols-outlined">gpp_maybe</span>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-gutter mb-6">
+    <!-- Chart 1: IOC Types -->
+    <div class="glass-panel p-6 rounded-xl">
+        <h4 class="font-label-caps text-[12px] text-on-surface-variant uppercase tracking-wider border-b border-outline-variant/20 pb-3 mb-4">Indicator Composition by Type</h4>
+        <div class="relative h-64 flex items-center justify-center">
+            <canvas id="iocTypesChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Chart 2: Severity Distribution -->
+    <div class="glass-panel p-6 rounded-xl">
+        <h4 class="font-label-caps text-[12px] text-on-surface-variant uppercase tracking-wider border-b border-outline-variant/20 pb-3 mb-4">Threat Severity Distribution</h4>
+        <div class="relative h-64 flex items-center justify-center">
+            <canvas id="iocSeverityChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Detections & Activity Row -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-gutter">
+    <!-- Recent Threats Table -->
+    <div class="glass-panel p-6 rounded-xl lg:col-span-2 overflow-x-auto">
+        <div class="flex justify-between items-center border-b border-outline-variant/20 pb-3 mb-4">
+            <h4 class="font-label-caps text-[12px] text-on-surface-variant uppercase tracking-wider">Recent Active Detections</h4>
+            <a href="{% url 'ioc_explorer' %}" class="text-xs font-label-caps text-primary-fixed hover:underline flex items-center gap-1">
+                View Explorer
+                <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+            </a>
+        </div>
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="font-label-caps text-[11px] text-on-surface-variant border-b border-outline-variant/30 pb-2">
+                    <th class="py-2">Indicator</th>
+                    <th class="py-2">Type</th>
+                    <th class="py-2 text-center">Sources</th>
+                    <th class="py-2 text-center">Risk</th>
+                    <th class="py-2 text-right">Severity</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ioc in recent_iocs %}
+                <tr class="data-table-row text-sm">
+                    <td class="py-3 font-data-mono text-xs truncate max-w-[200px]" title="{{ ioc.normalized_value }}">
+                        <button onclick="openIocModal({{ ioc.id }})" class="hover:text-primary-fixed hover:underline text-left">
+                            {{ ioc.normalized_value }}
+                        </button>
+                    </td>
+                    <td class="py-3">
+                        <span class="px-2 py-0.5 rounded text-[11px] font-label-caps border border-outline-variant/40 bg-surface-container-high/40 text-on-surface-variant">
+                            {{ ioc.ioc_type }}
+                        </span>
+                    </td>
+                    <td class="py-3 text-center font-data-mono text-xs">{{ ioc.correlation_result.source_count|default:1 }}</td>
+                    <td class="py-3 text-center">
+                        <span class="font-data-mono text-xs {% if ioc.risk_score >= 75 %}text-error{% elif ioc.risk_score >= 50 %}text-amber-500{% else %}text-primary-fixed{% endif %}">
+                            {{ ioc.risk_score }}
+                        </span>
+                    </td>
+                    <td class="py-3 text-right">
+                        <span class="status-badge px-2.5 py-0.5 rounded-full text-[10px] font-label-caps
+                            {% if ioc.severity == 'Critical' %}
+                                border-red-500 text-red-400 bg-red-950/20
+                            {% elif ioc.severity == 'High' %}
+                                border-orange-500 text-orange-400 bg-orange-950/20
+                            {% elif ioc.severity == 'Medium' %}
+                                border-yellow-500 text-yellow-400 bg-yellow-950/20
+                            {% else %}
+                                border-green-500 text-green-400 bg-green-950/20
+                            {% endif %}">
+                            <span class="status-dot 
+                                {% if ioc.severity == 'Critical' %}bg-red-500
+                                {% elif ioc.severity == 'High' %}bg-orange-500
+                                {% elif ioc.severity == 'Medium' %}bg-yellow-500
+                                {% else %}bg-green-500{% endif %}"></span>
+                            {{ ioc.severity }}
+                        </span>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="py-6 text-center text-on-surface-variant text-sm font-label-caps">No threats detected in database.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Recent System Activity Logs Panel -->
+    <div class="glass-panel p-6 rounded-xl flex flex-col">
+        <div class="flex justify-between items-center border-b border-outline-variant/20 pb-3 mb-4">
+            <h4 class="font-label-caps text-[12px] text-on-surface-variant uppercase tracking-wider">System Operations Log</h4>
+            <a href="{% url 'activity_logs' %}" class="text-xs font-label-caps text-primary-fixed hover:underline flex items-center gap-1">
+                Full Logs
+            </a>
+        </div>
+        <div class="flex-1 flex flex-col gap-4 overflow-y-auto max-h-[300px] pr-1">
+            {% for log in recent_logs %}
+            <div class="border-b border-outline-variant/10 pb-2.5 last:border-0">
+                <div class="flex justify-between items-start mb-1">
+                    <span class="font-label-caps text-[11px] font-bold {% if log.status == 'Error' %}text-error{% elif log.status == 'Warning' %}text-yellow-400{% else %}text-primary-fixed{% endif %}">
+                        {{ log.action }}
+                    </span>
+                    <span class="font-data-mono text-[10px] text-on-surface-variant/50">
+                        {{ log.timestamp|date:"H:i:s" }}
+                    </span>
+                </div>
+                <p class="text-xs text-on-surface-variant leading-relaxed">{{ log.description }}</p>
+            </div>
+            {% empty %}
+            <p class="text-xs text-on-surface-variant/40 font-label-caps text-center py-10">No recent activity logs.</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Detail Modal -->
+<div id="iocDetailModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm hidden">
+    <div class="glass-panel rounded-xl max-w-2xl w-full mx-4 overflow-hidden border border-primary-fixed/30 shadow-2xl">
+        <div class="flex justify-between items-center p-6 border-b border-outline-variant/20 bg-surface-container-low/80">
+            <div>
+                <h3 class="font-display-lg text-lg font-bold text-primary-fixed flex items-center gap-2">
+                    <span class="material-symbols-outlined">lock_open</span>
+                    Indicator Analysis Detail
+                </h3>
+                <p class="text-xs text-on-surface-variant/70 mt-0.5">ThreatIntel Deterministic Scoring Reason Audit</p>
+            </div>
+            <button onclick="closeIocModal()" class="text-on-surface-variant hover:text-on-surface">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        <div class="p-6 flex flex-col gap-6 overflow-y-auto max-h-[70vh]">
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="font-label-caps text-[10px] text-on-surface-variant uppercase tracking-wider block mb-1">Raw Value</label>
+                    <div id="modalRawValue" class="font-data-mono text-sm bg-surface-container/60 p-2.5 rounded border border-outline-variant/20 break-all select-all"></div>
+                </div>
+                <div>
+                    <label class="font-label-caps text-[10px] text-on-surface-variant uppercase tracking-wider block mb-1">Normalized Value</label>
+                    <div id="modalNormValue" class="font-data-mono text-sm bg-surface-container/60 p-2.5 rounded border border-outline-variant/20 break-all select-all"></div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div>
+                    <label class="font-label-caps text-[10px] text-on-surface-variant uppercase block mb-1">IOC Type</label>
+                    <div id="modalType" class="font-data-mono text-xs font-bold text-on-surface bg-surface-container/30 px-3 py-1.5 rounded"></div>
+                </div>
+                <div>
+                    <label class="font-label-caps text-[10px] text-on-surface-variant uppercase block mb-1">Risk Score</label>
+                    <div id="modalRiskScore" class="font-data-mono text-xs font-bold text-on-surface bg-surface-container/30 px-3 py-1.5 rounded"></div>
+                </div>
+                <div>
+                    <label class="font-label-caps text-[10px] text-on-surface-variant uppercase block mb-1">Severity</label>
+                    <div id="modalSeverity" class="font-data-mono text-xs font-bold text-on-surface bg-surface-container/30 px-3 py-1.5 rounded"></div>
+                </div>
+                <div>
+                    <label class="font-label-caps text-[10px] text-on-surface-variant uppercase block mb-1">Status</label>
+                    <div id="modalStatus" class="font-data-mono text-xs font-bold text-on-surface bg-surface-container/30 px-3 py-1.5 rounded"></div>
+                </div>
+            </div>
+
+            <div>
+                <label class="font-label-caps text-[10px] text-on-surface-variant uppercase block mb-1">Deterministic Scoring Explanation</label>
+                <div id="modalScoringReason" class="text-sm bg-primary-fixed/5 border border-primary-fixed/20 p-3 rounded text-on-surface/90 leading-relaxed italic"></div>
+            </div>
+
+            <div>
+                <label class="font-label-caps text-[10px] text-on-surface-variant uppercase block mb-2">Source Feeds Overlaps</label>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs border-collapse">
+                        <thead>
+                            <tr class="font-label-caps border-b border-outline-variant/30 text-on-surface-variant">
+                                <th class="py-1">Feed Name</th>
+                                <th class="py-1">Category</th>
+                                <th class="py-1 text-center">Occurrences</th>
+                                <th class="py-1 text-right">Last Seen</th>
+                            </tr>
+                        </thead>
+                        <tbody id="modalSourcesTable">
+                            <!-- Injected dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="p-4 bg-surface-container-lowest/80 border-t border-outline-variant/20 flex justify-end">
+            <button onclick="closeIocModal()" class="btn-glass px-4 py-1.5 rounded font-label-caps text-xs">Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js Injection -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // 1. IOC Types Chart
+    const typesCtx = document.getElementById('iocTypesChart').getContext('2d');
+    new Chart(typesCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['IPv4', 'Domain', 'URL', 'Hash', 'Email'],
+            datasets: [{
+                data: [
+                    {{ stats.iocs.by_type.IPv4|default:0 }},
+                    {{ stats.iocs.by_type.Domain|default:0 }},
+                    {{ stats.iocs.by_type.URL|default:0 }},
+                    {{ stats.iocs.by_type.Hash|default:0 }},
+                    {{ stats.iocs.by_type.Email|default:0 }}
+                ],
+                backgroundColor: [
+                    '#74f5ff', // IP - Cyan
+                    '#0566d9', // Domain - Blue
+                    '#adc6ff', // URL - Light Blue
+                    '#d0bcff', // Hash - Purple
+                    '#e3e1e9'  // Email - Gray
+                ],
+                borderWidth: 1,
+                borderColor: '#1e293b'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        color: '#b9cacb',
+                        font: { family: 'JetBrains Mono', size: 11 }
+                    }
+                }
+            }
+        }
+    });
+
+    // 2. IOC Severity Chart
+    const severityCtx = document.getElementById('iocSeverityChart').getContext('2d');
+    new Chart(severityCtx, {
+        type: 'bar',
+        data: {
+            labels: ['Low', 'Medium', 'High', 'Critical'],
+            datasets: [{
+                label: 'Threat Count',
+                data: [
+                    {{ stats.iocs.by_severity.Low|default:0 }},
+                    {{ stats.iocs.by_severity.Medium|default:0 }},
+                    {{ stats.iocs.by_severity.High|default:0 }},
+                    {{ stats.iocs.by_severity.Critical|default:0 }}
+                ],
+                backgroundColor: [
+                    'rgba(34, 197, 94, 0.4)',  // Low - Green
+                    'rgba(234, 179, 8, 0.4)',  // Medium - Yellow
+                    'rgba(249, 115, 22, 0.4)',  // High - Orange
+                    'rgba(239, 68, 68, 0.4)'   // Critical - Red
+                ],
+                borderColor: [
+                    '#22c55e', '#eab308', '#f97316', '#ef4444'
+                ],
+                borderWidth: 1.5
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: {
+                    grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                    ticks: { color: '#b9cacb', font: { family: 'JetBrains Mono' } }
+                },
+                x: {
+                    grid: { display: false },
+                    ticks: { color: '#b9cacb', font: { family: 'JetBrains Mono' } }
+                }
+            }
+        }
+    });
+
+    // 3. IOC Detail Modal JS
+    function openIocModal(iocId) {
+        fetch(`/iocs/${iocId}/detail/`)
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('modalRawValue').innerText = data.value;
+                document.getElementById('modalNormValue').innerText = data.normalized_value;
+                document.getElementById('modalType').innerText = data.ioc_type;
+                document.getElementById('modalRiskScore').innerText = data.risk_score;
+                document.getElementById('modalSeverity').innerText = data.severity;
+                document.getElementById('modalStatus').innerText = data.status;
+                document.getElementById('modalScoringReason').innerText = data.reason;
+
+                // Build sources rows
+                const tbody = document.getElementById('modalSourcesTable');
+                tbody.innerHTML = '';
+                if(data.sources && data.sources.length > 0) {
+                    data.sources.forEach(src => {
+                        const tr = document.createElement('tr');
+                        tr.className = 'border-b border-outline-variant/10 hover:bg-surface-container/40';
+                        tr.innerHTML = `
+                            <td class="py-2 text-on-surface font-semibold">${src.feed_name}</td>
+                            <td class="py-2 text-on-surface-variant">${src.category}</td>
+                            <td class="py-2 text-center font-data-mono">${src.occurrence_count}</td>
+                            <td class="py-2 text-right text-on-surface-variant/70 font-data-mono">${src.last_seen}</td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="4" class="py-3 text-center text-on-surface-variant/40">No sources found.</td></tr>';
+                }
+
+                document.getElementById('iocDetailModal').classList.remove('hidden');
+            });
+    }
+
+    function closeIocModal() {
+        document.getElementById('iocDetailModal').classList.add('hidden');
+    }
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    async function updateDashboardStats() {
+
+        try {
+           const response = await fetch("{% url 'api-dashboard-stats' %}", {
+                method: "GET",
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest"
+                },
+                credentials: "same-origin"
+            });
+
+            if (!response.ok) {
+                throw new Error(
+                    `Dashboard API returned ${response.status}`
+                );
+            }
+
+            const data = await response.json();
+
+            console.log("Live Dashboard Data:", data);
+
+            // -----------------------------
+            // FEEDS
+            // -----------------------------
+
+            const totalFeeds = document.getElementById(
+                "total-feeds"
+            );
+
+            const activeFeeds = document.getElementById(
+                "active-feeds"
+            );
+
+            if (totalFeeds) {
+                totalFeeds.textContent =
+                    data.total_feeds ?? 0;
+            }
+
+            if (activeFeeds) {
+                activeFeeds.textContent =
+                    `${data.active_feeds ?? 0} / ${data.total_feeds ?? 0}`;
+            }
+
+
+            // -----------------------------
+            // INDICATORS
+            // -----------------------------
+
+            const totalIndicators =
+                document.getElementById("total-indicators");
+
+            const uniqueIndicators =
+                document.getElementById("unique-indicators");
+
+            if (totalIndicators) {
+                totalIndicators.textContent =
+                    data.total_indicators ?? 0;
+            }
+
+            if (uniqueIndicators) {
+                uniqueIndicators.textContent =
+                    data.unique_active_iocs ?? 0;
+            }
+
+
+            // -----------------------------
+            // CORRELATED
+            // -----------------------------
+
+            const correlatedIndicators =
+                document.getElementById(
+                    "correlated-indicators"
+                );
+
+            if (correlatedIndicators) {
+                correlatedIndicators.textContent =
+                    data.correlated_iocs ?? 0;
+            }
+
+
+            // -----------------------------
+            // CRITICAL / HIGH
+            // -----------------------------
+
+            const criticalThreats =
+                document.getElementById(
+                    "critical-threats"
+                );
+
+            const highThreats =
+                document.getElementById(
+                    "high-threats"
+                );
+
+            const severity =
+                data.severity_breakdown || {};
+
+            const critical =
+                severity.Critical ?? 0;
+
+            const high =
+                severity.High ?? 0;
+
+            if (criticalThreats) {
+                criticalThreats.textContent =
+                    critical;
+            }
+
+            if (highThreats) {
+                highThreats.textContent =
+                    `+ ${high} High`;
+            }
+
+        } catch (error) {
+
+            console.error(
+                "Dashboard live update failed:",
+                error
+            );
+
+        }
+    }
+
+
+    // First load
+    updateDashboardStats();
+
+
+    // Refresh every 30 seconds
+    setInterval(
+        updateDashboardStats,
+        10000
+    );
+
+});
+</script>
+{% endblock %}

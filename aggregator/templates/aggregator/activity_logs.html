@@ -1,0 +1,90 @@
+{% extends 'aggregator/base.html' %}
+
+{% block title %}Activity Logs{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="mb-6">
+    <h2 class="font-headline-lg text-2xl font-bold text-primary-fixed">Operator Activity & System Audit Logs</h2>
+    <p class="text-sm text-on-surface-variant">Trace operational session history, feed ingestion events, and parsing actions.</p>
+</div>
+
+<!-- Logs Panel -->
+<div class="glass-panel p-6 rounded-xl overflow-x-auto mb-6">
+    <table class="w-full text-left border-collapse">
+        <thead>
+            <tr class="font-label-caps text-[11px] text-on-surface-variant border-b border-outline-variant/30 pb-2">
+                <th class="py-2">Timestamp</th>
+                <th class="py-2">Operator</th>
+                <th class="py-2">Action Executed</th>
+                <th class="py-2">Module</th>
+                <th class="py-2 text-center">Status</th>
+                <th class="py-2">Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for log in page_obj %}
+            <tr class="data-table-row text-sm">
+                <td class="py-3 font-data-mono text-xs text-on-surface-variant/80">{{ log.timestamp|date:"Y-m-d H:i:s" }}</td>
+                <td class="py-3 font-semibold text-on-surface">
+                    {{ log.user.username|default:"System" }}
+                </td>
+                <td class="py-3 font-semibold text-primary-fixed text-xs">{{ log.action }}</td>
+                <td class="py-3 font-data-mono text-xs text-on-surface-variant">{{ log.module }}</td>
+                <td class="py-3 text-center">
+                    <span class="px-2 py-0.5 rounded text-[10px] font-label-caps border 
+                        {% if log.status == 'Success' %}
+                            border-green-500 text-green-400 bg-green-950/20
+                        {% elif log.status == 'Warning' or log.status == 'Rejected' %}
+                            border-yellow-500 text-yellow-400 bg-yellow-950/20
+                        {% else %}
+                            border-error text-error bg-error-container/20
+                        {% endif %}">
+                        {{ log.status }}
+                    </span>
+                </td>
+                <td class="py-3 text-xs text-on-surface-variant max-w-sm truncate" title="{{ log.description }}">
+                    {{ log.description }}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" class="py-8 text-center text-on-surface-variant text-sm font-label-caps">No audit logs registered.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Pagination controls -->
+    {% if page_obj.has_other_pages %}
+    <div class="flex justify-between items-center border-t border-outline-variant/20 pt-4 mt-4 font-label-caps text-xs">
+        <span class="text-on-surface-variant">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }} (Total: {{ page_obj.paginator.count }} logs)</span>
+        <div class="flex gap-2">
+            {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}" class="px-3 py-1.5 rounded btn-glass flex items-center gap-1">
+                <span class="material-symbols-outlined text-[14px]">arrow_back</span>
+                Prev
+            </a>
+            {% else %}
+            <span class="px-3 py-1.5 rounded border border-outline-variant/20 bg-surface-container/20 text-on-surface-variant/40 flex items-center gap-1 cursor-not-allowed">
+                <span class="material-symbols-outlined text-[14px]">arrow_back</span>
+                Prev
+            </span>
+            {% endif %}
+
+            {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}" class="px-3 py-1.5 rounded btn-glass flex items-center gap-1">
+                Next
+                <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+            </a>
+            {% else %}
+            <span class="px-3 py-1.5 rounded border border-outline-variant/20 bg-surface-container/20 text-on-surface-variant/40 flex items-center gap-1 cursor-not-allowed">
+                Next
+                <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+            </span>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

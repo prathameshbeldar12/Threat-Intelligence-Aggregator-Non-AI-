@@ -1,0 +1,103 @@
+{% extends 'aggregator/base.html' %}
+
+{% block title %}Blocklist Generator{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="mb-6">
+    <h2 class="font-headline-lg text-2xl font-bold text-primary-fixed">Firewall & Security Blocklist Generator</h2>
+    <p class="text-sm text-on-surface-variant">Filter threat database and compile downloadable defensive blocklists for security appliances.</p>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-gutter">
+    <!-- Generator Form Card -->
+    <div class="glass-panel p-6 rounded-xl h-fit flex flex-col gap-4">
+        <div class="flex items-center gap-2 border-b border-outline-variant/20 pb-3 mb-2">
+            <span class="material-symbols-outlined text-primary-fixed">tune</span>
+            <h4 class="font-label-caps text-xs text-on-surface uppercase tracking-wider font-bold">Blocklist Filter Settings</h4>
+        </div>
+        <form method="POST" action="{% url 'blocklists' %}" class="flex flex-col gap-4">
+            {% csrf_token %}
+            
+            <div class="flex flex-col gap-1.5">
+                <label class="font-label-caps text-[11px] text-on-surface-variant uppercase tracking-wider">Indicator Type</label>
+                <select name="ioc_type" required class="input-glass w-full px-3 py-2 rounded text-sm bg-surface text-on-surface focus:outline-none">
+                    <option value="IP">IPv4 Addresses</option>
+                    <option value="Domain">Domain Names</option>
+                    <option value="URL">URLs / Paths</option>
+                    <option value="Hash">MD5/SHA1/SHA256 Hashes</option>
+                </select>
+            </div>
+
+            <div class="flex flex-col gap-1.5">
+                <label class="font-label-caps text-[11px] text-on-surface-variant uppercase tracking-wider">Minimum Severity</label>
+                <select name="min_severity" class="input-glass w-full px-3 py-2 rounded text-sm bg-surface text-on-surface focus:outline-none">
+                    <option value="Low">Low+</option>
+                    <option value="Medium" selected>Medium+</option>
+                    <option value="High">High+</option>
+                    <option value="Critical">Critical Only</option>
+                </select>
+            </div>
+
+            <div class="flex flex-col gap-1.5">
+                <label class="font-label-caps text-[11px] text-on-surface-variant uppercase tracking-wider">Minimum Risk Score (0-100)</label>
+                <input class="input-glass w-full px-3 py-2 rounded text-sm text-on-surface focus:outline-none" 
+                       type="number" name="min_risk_score" min="0" max="100" value="40" required>
+            </div>
+
+            <div class="flex flex-col gap-1.5">
+                <label class="font-label-caps text-[11px] text-on-surface-variant uppercase tracking-wider">Output File Format</label>
+                <select name="file_format" class="input-glass w-full px-3 py-2 rounded text-sm bg-surface text-on-surface focus:outline-none">
+                    <option value="TXT">TXT Plain List (Standard Firewall format)</option>
+                    <option value="CSV">CSV Table (SIEM/Analytics format)</option>
+                    <option value="JSON">JSON Structure (API/Integrations format)</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn-primary w-full py-3 mt-2 rounded font-label-caps text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2">
+                <span class="material-symbols-outlined text-[16px]">download</span>
+                Generate & Download File
+            </button>
+        </form>
+    </div>
+
+    <!-- History list -->
+    <div class="glass-panel p-6 rounded-xl lg:col-span-2 overflow-x-auto">
+        <div class="border-b border-outline-variant/20 pb-3 mb-4">
+            <h4 class="font-label-caps text-[12px] text-on-surface-variant uppercase tracking-wider">Export Logs & Generated History</h4>
+        </div>
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="font-label-caps text-[11px] text-on-surface-variant border-b border-outline-variant/30 pb-2">
+                    <th class="py-2">Generated Item</th>
+                    <th class="py-2">Type</th>
+                    <th class="py-2">Min Severity</th>
+                    <th class="py-2 text-center">Indicators</th>
+                    <th class="py-2 text-center">Format</th>
+                    <th class="py-2 text-right">Timestamp</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in history %}
+                <tr class="data-table-row text-sm">
+                    <td class="py-3 font-semibold text-on-surface">{{ item.name }}</td>
+                    <td class="py-3 font-data-mono text-xs">{{ item.blocklist_type }}</td>
+                    <td class="py-3 font-data-mono text-xs">{{ item.severity_filter }}</td>
+                    <td class="py-3 text-center font-data-mono text-xs">{{ item.indicator_count }}</td>
+                    <td class="py-3 text-center">
+                        <span class="px-2 py-0.5 rounded text-[10px] font-label-caps border border-primary-fixed/20 bg-primary-fixed/5 text-primary-fixed">
+                            {{ item.file_format }}
+                        </span>
+                    </td>
+                    <td class="py-3 text-right font-data-mono text-xs text-on-surface-variant">{{ item.generated_at|date:"Y-m-d H:i:s" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="py-8 text-center text-on-surface-variant text-sm font-label-caps">No blocklists generated yet. Set parameters and click download above.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

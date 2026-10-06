@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>{% block title %}ThreatIntel{% endblock %} - Threat Intelligence Aggregator</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-fixed-dim": "#adc6ff",
+                        "primary-fixed": "#74f5ff",
+                        "surface-container-lowest": "#0d0e13",
+                        "on-surface": "#e3e1e9",
+                        "outline-variant": "#3a494b",
+                        "secondary": "#adc6ff",
+                        "on-secondary-container": "#e6ecff",
+                        "tertiary-fixed": "#e9ddff",
+                        "secondary-fixed": "#d8e2ff",
+                        "on-secondary-fixed": "#001a42",
+                        "on-primary": "#00363a",
+                        "on-error": "#690005",
+                        "on-tertiary-fixed": "#23005c",
+                        "on-secondary-fixed-variant": "#004395",
+                        "tertiary-container": "#e2d4ff",
+                        "on-secondary": "#002e6a",
+                        "primary-container": "#00f2ff",
+                        "on-primary-fixed-variant": "#004f54",
+                        "on-tertiary-container": "#6f3cd8",
+                        "surface": "#121318",
+                        "error-container": "#93000a",
+                        "inverse-primary": "#00696f",
+                        "primary-fixed-dim": "#00dbe7",
+                        "on-surface-variant": "#b9cacb",
+                        "on-background": "#e3e1e9",
+                        "on-tertiary": "#3c0091",
+                        "error": "#ffb4ab",
+                        "secondary-container": "#0566d9",
+                        "on-primary-container": "#006a71",
+                        "surface-bright": "#38393f",
+                        "surface-container-highest": "#34343a",
+                        "surface-variant": "#34343a",
+                        "outline": "#849495",
+                        "inverse-surface": "#e3e1e9",
+                        "tertiary": "#fcf5ff",
+                        "surface-dim": "#121318",
+                        "tertiary-fixed-dim": "#d0bcff",
+                        "surface-container": "#1e1f25",
+                        "background": "#121318",
+                        "surface-container-high": "#292a2f",
+                        "on-primary-fixed": "#002022",
+                        "on-tertiary-fixed-variant": "#5516be",
+                        "surface-tint": "#00dbe7",
+                        "on-error-container": "#ffdad6",
+                        "inverse-on-surface": "#2f3036",
+                        "surface-container-low": "#1a1b21",
+                        "primary": "#e1fdff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "container-padding": "24px",
+                        "unit": "4px",
+                        "gutter": "16px",
+                        "stack-sm": "8px",
+                        "stack-md": "16px",
+                        "stack-lg": "32px"
+                    },
+                    "fontFamily": {
+                        "label-caps": ["JetBrains Mono"],
+                        "data-mono": ["JetBrains Mono"],
+                        "display-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "body-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "label-caps": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700" }],
+                        "data-mono": ["14px", { "lineHeight": "20px", "fontWeight": "500" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }]
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        body { 
+            background-color: #050507; 
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(116, 245, 255, 0.03), transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(5, 102, 217, 0.03), transparent 25%);
+            background-attachment: fixed;
+        }
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.4);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .glass-panel:hover {
+            border-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 0 15px rgba(116, 245, 255, 0.05);
+            transition: border-color 0.3s ease;
+        }
+        .data-table-row {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .data-table-row:nth-child(even) {
+            background-color: rgba(255, 255, 255, 0.02);
+        }
+        .data-table-row:hover {
+            background-color: rgba(116, 245, 255, 0.05);
+        }
+        .status-badge {
+            border: 1px solid;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .side-nav-active {
+            color: #74f5ff !important;
+            font-weight: 700 !important;
+            border-left-width: 2px !important;
+            border-left-color: #74f5ff !important;
+            background-color: rgba(225, 253, 255, 0.1) !important;
+        }
+        .input-glass {
+            background: rgba(26, 27, 33, 0.6);
+            border: none;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            color: #e3e1e9;
+            transition: all 0.3s ease;
+        }
+        .input-glass:focus {
+            outline: none;
+            border: 1px solid #74f5ff;
+            box-shadow: inset 0 0 10px rgba(116, 245, 255, 0.1);
+            background: rgba(26, 27, 33, 0.9);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #74f5ff 0%, #0566d9 100%);
+            color: #002022;
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            box-shadow: 0 0 15px rgba(116, 245, 255, 0.4);
+            transform: translateY(-1px);
+        }
+        .btn-glass {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #e3e1e9;
+            transition: all 0.3s ease;
+        }
+        .btn-glass:hover {
+            border-color: #74f5ff;
+            box-shadow: 0 0 10px rgba(116, 245, 255, 0.2);
+            color: #74f5ff;
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(18, 19, 24, 0.5);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(116, 245, 255, 0.2);
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(116, 245, 255, 0.4);
+        }
+    </style>
+</head>
+<body class="text-on-surface font-body-md overflow-x-hidden pt-16 md:pl-64">
+    <!-- TopNavBar -->
+    <nav class="fixed top-0 right-0 left-0 md:left-64 flex justify-between items-center px-gutter h-16 z-40 bg-surface-container-lowest/30 backdrop-blur-md border-b border-outline-variant/20">
+        <div class="flex items-center gap-4">
+            <span class="font-headline-md text-headline-md font-black text-primary-fixed block md:hidden">ThreatIntel</span>
+            <form action="{% url 'ioc_explorer' %}" method="GET" class="relative hidden sm:flex items-center bg-surface-container/50 rounded-full px-4 py-1 border border-outline-variant/30 focus-within:border-primary-fixed focus-within:shadow-[0_0_8px_rgba(116,245,255,0.2)] transition-all">
+                <span class="material-symbols-outlined text-on-surface-variant text-[20px] mr-2">search</span>
+                <input class="bg-transparent border-none text-data-mono font-data-mono text-on-surface focus:ring-0 placeholder:text-on-surface-variant/50 w-64 p-0" name="q" value="{{ query|default:'' }}" placeholder="Search IOCs..." type="text"/>
+            </form>
+        </div>
+        <div class="flex items-center gap-6">
+            <div class="flex items-center gap-4 text-on-surface-variant">
+                <span class="text-sm font-label-caps text-primary-fixed/80">ALIGNED DETECTIONS</span>
+            </div>
+            <div class="h-6 w-px bg-outline-variant/40"></div>
+            <span class="font-label-caps text-[13px] text-on-surface-variant uppercase tracking-wider hidden md:inline">Analyst: {{ request.user.username }}</span>
+<form
+    action="{% url 'logout' %}"
+    method="POST"
+    class="inline"
+>
+    {% csrf_token %}
+
+    <button
+        type="submit"
+        class="flex items-center gap-1 text-on-surface-variant hover:text-error transition-colors"
+        title="Logout"
+    >
+        <span class="material-symbols-outlined text-[20px]">
+            logout
+        </span>
+
+        <span class="text-[13px] font-label-caps hidden sm:inline">
+            Logout
+        </span>
+    </button>
+</form>    
+            </a>
+        </div>
+    </nav>
+
+    <!-- SideNavBar -->
+    <aside class="fixed left-0 top-0 h-full flex flex-col z-50 bg-surface-container-low/40 backdrop-blur-xl docked h-screen w-64 border-r border-outline-variant/20 shadow-2xl transition-all duration-300 ease-in-out hidden md:flex">
+        <div class="p-6 pb-4 border-b border-outline-variant/20">
+            <div class="flex items-center gap-3">
+                <div class="h-10 w-10 rounded bg-primary-fixed/20 border border-primary-fixed/50 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-primary-fixed">shield</span>
+                </div>
+                <div>
+                    <h1 class="font-display-lg text-[22px] font-bold text-primary-fixed tracking-tighter leading-tight">ThreatIntel</h1>
+                    <p class="font-label-caps text-[9px] text-on-surface-variant uppercase tracking-widest">Sentinel Operations</p>
+                </div>
+            </div>
+        </div>
+        <div class="flex-1 overflow-y-auto py-4 flex flex-col gap-1 px-3">
+            <a class="flex items-center gap-3 px-4 py-2.5 rounded text-on-surface-variant font-medium hover:bg-surface-container-highest/50 hover:text-primary-fixed transition-colors border-l-2 border-transparent {% if page == 'dashboard' %}side-nav-active{% endif %}" href="{% url 'dashboard' %}">
+                <span class="material-symbols-outlined">dashboard</span>
+                <span class="font-label-caps text-[13px] tracking-wide">Dashboard</span>
+            </a>
+            <a class="flex items-center gap-3 px-4 py-2.5 rounded text-on-surface-variant font-medium hover:bg-surface-container-highest/50 hover:text-primary-fixed transition-colors border-l-2 border-transparent {% if page == 'feed_management' %}side-nav-active{% endif %}" href="{% url 'feed_management' %}">
+                <span class="material-symbols-outlined">rss_feed</span>
+                <span class="font-label-caps text-[13px] tracking-wide">Feed Management</span>
+            </a>
+            <a class="flex items-center gap-3 px-4 py-2.5 rounded text-on-surface-variant font-medium hover:bg-surface-container-highest/50 hover:text-primary-fixed transition-colors border-l-2 border-transparent {% if page == 'ioc_explorer' %}side-nav-active{% endif %}" href="{% url 'ioc_explorer' %}">
+                <span class="material-symbols-outlined">search_check</span>
+                <span class="font-label-caps text-[13px] tracking-wide">IOC Explorer</span>
+            </a>
+            <a class="flex items-center gap-3 px-4 py-2.5 rounded text-on-surface-variant font-medium hover:bg-surface-container-highest/50 hover:text-primary-fixed transition-colors border-l-2 border-transparent {% if page == 'correlation' %}side-nav-active{% endif %}" href="{% url 'correlation' %}">
+                <span class="material-symbols-outlined">hub</span>
+                <span class="font-label-caps text-[13px] tracking-wide">Correlation</span>
+            </a>
+            <a class="flex items-center gap-3 px-4 py-2.5 rounded text-on-surface-variant font-medium hover:bg-surface-container-highest/50 hover:text-primary-fixed transition-colors border-l-2 border-transparent {% if page == 'blocklists' %}side-nav-active{% endif %}" href="{% url 'blocklists' %}">
+                <span class="material-symbols-outlined">block</span>
+                <span class="font-label-caps text-[13px] tracking-wide">Blocklists</span>
+            </a>
+            <a class="flex items-center gap-3 px-4 py-2.5 rounded text-on-surface-variant font-medium hover:bg-surface-container-highest/50 hover:text-primary-fixed transition-colors border-l-2 border-transparent {% if page == 'reports' %}side-nav-active{% endif %}" href="{% url 'reports' %}">
+                <span class="material-symbols-outlined">assessment</span>
+                <span class="font-label-caps text-[13px] tracking-wide">Reports</span>
+            </a>
+            <a class="flex items-center gap-3 px-4 py-2.5 rounded text-on-surface-variant font-medium hover:bg-surface-container-highest/50 hover:text-primary-fixed transition-colors border-l-2 border-transparent {% if page == 'activity_logs' %}side-nav-active{% endif %}" href="{% url 'activity_logs' %}">
+                <span class="material-symbols-outlined">history</span>
+                <span class="font-label-caps text-[13px] tracking-wide">Activity Logs</span>
+            </a>
+        </div>
+        <div class="p-4 border-t border-outline-variant/20 text-center">
+            <span class="text-[10px] font-label-caps text-on-surface-variant/40">VERSION 1.2.0 (NON-AI)</span>
+        </div>
+    </aside>
+
+    <!-- Main Content Grid -->
+    <main class="p-gutter min-h-[calc(100vh-4rem)] flex flex-col gap-stack-md">
+        <!-- Django Notification Toasts -->
+        {% if messages %}
+        <div class="flex flex-col gap-2 mb-4">
+            {% for message in messages %}
+            <div class="px-4 py-3 rounded border {% if message.tags == 'error' %}bg-error-container/30 border-error text-error{% else %}bg-primary-container/20 border-primary-fixed text-primary-fixed{% endif %} flex items-center justify-between shadow-lg">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined">
+                        {% if message.tags == 'error' %}gpp_maybe{% else %}check_circle{% endif %}
+                    </span>
+                    <span class="text-sm font-medium">{{ message }}</span>
+                </div>
+                <button onclick="this.parentElement.remove()" class="text-on-surface-variant hover:text-on-surface">
+                    <span class="material-symbols-outlined text-[18px]">close</span>
+                </button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>

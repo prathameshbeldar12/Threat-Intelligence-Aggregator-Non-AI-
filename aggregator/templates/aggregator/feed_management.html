@@ -1,0 +1,868 @@
+{% extends 'aggregator/base.html' %}
+
+{% block title %}Feed Management{% endblock %}
+
+{% block content %}
+
+<!-- Header -->
+
+<div class="flex justify-between items-center mb-6">
+
+```
+<div>
+    <h2 class="font-headline-lg text-2xl font-bold text-primary-fixed">
+        Threat Intelligence Feed Management
+    </h2>
+
+    <p class="text-sm text-on-surface-variant">
+        Configure remote cyber threat intelligence feeds and import local intelligence files.
+    </p>
+</div>
+
+<button
+    type="button"
+    onclick="openFeedModal()"
+    class="btn-primary px-4 py-2 rounded font-label-caps text-xs font-bold uppercase tracking-wider flex items-center gap-2"
+>
+    <span class="material-symbols-outlined text-[16px]">
+        add_box
+    </span>
+
+    Add Intel Feed
+</button>
+```
+
+</div>
+
+<!-- Messages -->
+
+{% if messages %}
+
+<div class="mb-6 space-y-2">
+
+```
+{% for message in messages %}
+
+<div
+    class="glass-panel px-4 py-3 rounded-lg border border-outline-variant/30 text-sm"
+    role="alert"
+>
+    {{ message }}
+</div>
+
+{% endfor %}
+```
+
+</div>
+{% endif %}
+
+<!-- Feeds Table Panel -->
+
+<div class="glass-panel p-6 rounded-xl overflow-x-auto">
+
+```
+<table class="w-full text-left border-collapse">
+
+    <thead>
+        <tr class="font-label-caps text-[11px] text-on-surface-variant border-b border-outline-variant/30">
+
+            <th class="py-3 px-2">
+                Feed Name
+            </th>
+
+            <th class="py-3 px-2">
+                Source Type
+            </th>
+
+            <th class="py-3 px-2">
+                Format
+            </th>
+
+            <th class="py-3 px-2">
+                Threat Category
+            </th>
+
+            <th class="py-3 px-2 text-center">
+                Status
+            </th>
+
+            <th class="py-3 px-2">
+                Last Processed
+            </th>
+
+            <th class="py-3 px-2 text-right">
+                Actions
+            </th>
+
+        </tr>
+    </thead>
+
+
+    <tbody>
+
+        {% for feed in feeds %}
+
+        <tr class="data-table-row text-sm border-b border-outline-variant/10">
+
+            <!-- Feed Name -->
+            <td class="py-4 px-2 font-semibold text-on-surface">
+
+                {{ feed.name }}
+
+                {% if feed.url %}
+
+                <span
+                    class="block font-data-mono text-[10px] text-on-surface-variant/50 max-w-[300px] truncate mt-1"
+                    title="{{ feed.url }}"
+                >
+                    {{ feed.url }}
+                </span>
+
+                {% endif %}
+
+            </td>
+
+
+            <!-- Source -->
+            <td class="py-4 px-2 font-data-mono text-xs">
+                {{ feed.source }}
+            </td>
+
+
+            <!-- Feed Type -->
+            <td class="py-4 px-2 font-data-mono text-xs">
+                {{ feed.feed_type }}
+            </td>
+
+
+            <!-- Category -->
+            <td class="py-4 px-2 text-on-surface-variant text-xs">
+                {{ feed.category }}
+            </td>
+
+
+            <!-- Status -->
+            <td class="py-4 px-2 text-center">
+
+                <form
+                    method="POST"
+                    action="{% url 'toggle_feed' feed.id %}"
+                    class="inline"
+                >
+
+                    {% csrf_token %}
+
+                    <button
+                        type="submit"
+                        class="status-badge px-2.5 py-1 rounded text-[10px] font-label-caps border transition-all hover:opacity-80"
+                        title="Click to change feed status"
+                    >
+
+                        {% if feed.is_active %}
+                            ACTIVE
+                        {% else %}
+                            DISABLED
+                        {% endif %}
+
+                    </button>
+
+                </form>
+
+            </td>
+
+
+            <!-- Last Processed -->
+            <td class="py-4 px-2 font-data-mono text-xs text-on-surface-variant">
+
+                {% if feed.last_processed_at %}
+
+                    {{ feed.last_processed_at|date:"Y-m-d H:i" }}
+
+                {% else %}
+
+                    Never
+
+                {% endif %}
+
+            </td>
+
+
+            <!-- Actions -->
+            <td class="py-4 px-2 text-right">
+
+                <div class="inline-flex items-center gap-2">
+
+
+                    <!-- Process Feed -->
+                    <form
+                        method="POST"
+                        action="{% url 'process_feed' feed.id %}"
+                        class="inline"
+                    >
+
+                        {% csrf_token %}
+
+                        <button
+                            type="submit"
+                            class="px-2.5 py-1.5 rounded bg-primary-fixed/15 border border-primary-fixed/30 hover:bg-primary-fixed/35 text-primary-fixed text-xs font-label-caps flex items-center gap-1 transition-all"
+                            title="Process Feed"
+                        >
+
+                            <span class="material-symbols-outlined text-sm">
+                                sync
+                            </span>
+
+                            Process
+
+                        </button>
+
+                    </form>
+
+
+                    <!-- Delete Feed -->
+                    <form
+                        method="POST"
+                        action="{% url 'delete_feed' feed.id %}"
+                        class="inline"
+                        onsubmit="return confirmDeleteFeed('{{ feed.name|escapejs }}');"
+                    >
+
+                        {% csrf_token %}
+
+                        <button
+                            type="submit"
+                            class="px-2.5 py-1.5 rounded bg-error-container/20 border border-error/30 hover:bg-error-container/40 text-error text-xs font-label-caps flex items-center gap-1 transition-all"
+                            title="Delete Feed"
+                        >
+
+                            <span class="material-symbols-outlined text-sm">
+                                delete
+                            </span>
+
+                            Delete
+
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </td>
+
+        </tr>
+
+        {% empty %}
+
+        <tr>
+
+            <td
+                colspan="7"
+                class="py-12 text-center text-on-surface-variant text-sm font-label-caps"
+            >
+
+                <div class="flex flex-col items-center gap-3">
+
+                    <span class="material-symbols-outlined text-4xl opacity-40">
+                        database
+                    </span>
+
+                    <span>
+                        No feeds registered in system.
+                    </span>
+
+                    <button
+                        type="button"
+                        onclick="openFeedModal()"
+                        class="btn-primary px-4 py-2 rounded text-xs font-label-caps"
+                    >
+                        Add Your First Feed
+                    </button>
+
+                </div>
+
+            </td>
+
+        </tr>
+
+        {% endfor %}
+
+    </tbody>
+
+</table>
+```
+
+</div>
+
+<!-- ========================================================= -->
+
+<!-- ADD FEED MODAL -->
+
+<!-- ========================================================= -->
+
+<div
+    id="addFeedModal"
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm hidden"
+    aria-hidden="true"
+>
+
+```
+<div
+    class="glass-panel rounded-xl max-w-lg w-full mx-4 overflow-hidden border border-primary-fixed/30 shadow-2xl"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="addFeedModalTitle"
+>
+
+
+    <!-- Modal Header -->
+    <div class="flex justify-between items-center p-6 border-b border-outline-variant/20 bg-surface-container-low/80">
+
+        <h3
+            id="addFeedModalTitle"
+            class="font-display-lg text-lg font-bold text-primary-fixed flex items-center gap-2"
+        >
+
+            <span class="material-symbols-outlined">
+                add_link
+            </span>
+
+            Register Threat Intelligence Feed
+
+        </h3>
+
+
+        <button
+            type="button"
+            onclick="closeFeedModal()"
+            class="text-on-surface-variant hover:text-on-surface transition-colors"
+            aria-label="Close"
+        >
+
+            <span class="material-symbols-outlined">
+                close
+            </span>
+
+        </button>
+
+    </div>
+
+
+
+    <!-- Feed Form -->
+    <form
+        id="feedForm"
+        action="{% url 'feed_management' %}"
+        method="POST"
+        enctype="multipart/form-data"
+    >
+
+        {% csrf_token %}
+
+
+        <div class="p-6 flex flex-col gap-4 overflow-y-auto max-h-[60vh]">
+
+
+            <!-- Feed Name -->
+            <div class="flex flex-col gap-1.5">
+
+                <label
+                    for="{{ form.name.id_for_label }}"
+                    class="font-label-caps text-[11px] text-on-surface-variant uppercase tracking-wider"
+                >
+                    Feed Name
+                </label>
+
+                {{ form.name }}
+
+                {% if form.name.errors %}
+                <div class="text-error text-xs">
+                    {{ form.name.errors }}
+                </div>
+                {% endif %}
+
+            </div>
+
+
+
+            <!-- Source + Feed Type -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+
+                <!-- Source -->
+                <div class="flex flex-col gap-1.5">
+
+                    <label
+                        for="{{ form.source.id_for_label }}"
+                        class="font-label-caps text-[11px] text-on-surface-variant uppercase tracking-wider"
+                    >
+                        Intel Source
+                    </label>
+
+                    {{ form.source }}
+
+                    {% if form.source.errors %}
+                    <div class="text-error text-xs">
+                        {{ form.source.errors }}
+                    </div>
+                    {% endif %}
+
+                </div>
+
+
+                <!-- Feed Type -->
+                <div class="flex flex-col gap-1.5">
+
+                    <label
+                        for="{{ form.feed_type.id_for_label }}"
+                        class="font-label-caps text-[11px] text-on-surface-variant uppercase tracking-wider"
+                    >
+                        Feed Format Type
+                    </label>
+
+                    {{ form.feed_type }}
+
+                    {% if form.feed_type.errors %}
+                    <div class="text-error text-xs">
+                        {{ form.feed_type.errors }}
+                    </div>
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+
+
+            <!-- Category -->
+            <div class="flex flex-col gap-1.5">
+
+                <label
+                    for="{{ form.category.id_for_label }}"
+                    class="font-label-caps text-[11px] text-on-surface-variant uppercase tracking-wider"
+                >
+                    Intel Category Tag
+                </label>
+
+                {{ form.category }}
+
+                {% if form.category.errors %}
+                <div class="text-error text-xs">
+                    {{ form.category.errors }}
+                </div>
+                {% endif %}
+
+            </div>
+
+
+
+            <!-- URL -->
+            <div
+                id="urlGroup"
+                class="flex flex-col gap-1.5"
+            >
+
+                <label
+                    for="{{ form.url.id_for_label }}"
+                    class="font-label-caps text-[11px] text-on-surface-variant uppercase tracking-wider"
+                >
+                    Intel Feed URL
+                </label>
+
+                {{ form.url }}
+
+                <p class="text-[10px] text-on-surface-variant">
+                    Use a trusted HTTP/HTTPS threat intelligence feed.
+                </p>
+
+                {% if form.url.errors %}
+                <div class="text-error text-xs">
+                    {{ form.url.errors }}
+                </div>
+                {% endif %}
+
+            </div>
+
+
+
+            <!-- File Upload -->
+            <div
+                id="fileGroup"
+                class="flex flex-col gap-1.5 hidden"
+            >
+
+                <label
+                    for="id_file_upload"
+                    class="font-label-caps text-[11px] text-on-surface-variant uppercase tracking-wider"
+                >
+                    Upload Intel File
+                </label>
+
+
+                <div
+                    class="relative flex items-center justify-center border border-dashed border-outline-variant/50 rounded p-6 bg-surface-container-low/30 hover:border-primary-fixed transition-colors"
+                >
+
+                    <input
+                        type="file"
+                        name="file_upload"
+                        id="id_file_upload"
+                        accept=".csv,.txt,.json"
+                        class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    >
+
+
+                    <div class="text-center pointer-events-none">
+
+                        <span class="material-symbols-outlined text-[32px] text-on-surface-variant mb-1">
+                            upload_file
+                        </span>
+
+                        <p
+                            class="text-xs text-on-surface-variant font-label-caps"
+                            id="file-label-text"
+                        >
+                            Select CSV, TXT or JSON file
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <p class="text-[10px] text-on-surface-variant">
+                    Maximum supported upload size depends on the Django server configuration.
+                </p>
+
+            </div>
+
+
+
+            <!-- Description -->
+            <div class="flex flex-col gap-1.5">
+
+                <label
+                    for="{{ form.description.id_for_label }}"
+                    class="font-label-caps text-[11px] text-on-surface-variant uppercase tracking-wider"
+                >
+                    Description
+                </label>
+
+                {{ form.description }}
+
+                {% if form.description.errors %}
+                <div class="text-error text-xs">
+                    {{ form.description.errors }}
+                </div>
+                {% endif %}
+
+            </div>
+
+
+        </div>
+
+
+
+        <!-- Modal Footer -->
+        <div class="p-4 bg-surface-container-lowest/80 border-t border-outline-variant/20 flex justify-end gap-3">
+
+            <button
+                type="button"
+                onclick="closeFeedModal()"
+                class="btn-glass px-4 py-2 rounded font-label-caps text-xs"
+            >
+                Cancel
+            </button>
+
+
+            <button
+                type="submit"
+                id="submitFeedButton"
+                class="btn-primary px-5 py-2 rounded font-label-caps text-xs font-bold uppercase tracking-wider flex items-center gap-2"
+            >
+
+                <span class="material-symbols-outlined text-sm">
+                    cloud_upload
+                </span>
+
+                Register & Process
+
+            </button>
+
+        </div>
+
+    </form>
+
+</div>
+```
+
+</div>
+
+<!-- ========================================================= -->
+
+<!-- JAVASCRIPT -->
+
+<!-- ========================================================= -->
+
+<script>
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    const modal = document.getElementById("addFeedModal");
+    const sourceSelect = document.getElementById("id_source");
+    const urlGroup = document.getElementById("urlGroup");
+    const fileGroup = document.getElementById("fileGroup");
+
+    const fileInput = document.getElementById("id_file_upload");
+    const fileLabel = document.getElementById("file-label-text");
+
+    const feedForm = document.getElementById("feedForm");
+    const submitButton = document.getElementById("submitFeedButton");
+
+
+    /*
+     * ---------------------------------------------------------
+     * OPEN MODAL
+     * ---------------------------------------------------------
+     */
+
+    window.openFeedModal = function () {
+
+        if (!modal) {
+            return;
+        }
+
+        modal.classList.remove("hidden");
+        modal.setAttribute("aria-hidden", "false");
+
+        document.body.classList.add("overflow-hidden");
+
+        toggleSourceFields();
+
+    };
+
+
+    /*
+     * ---------------------------------------------------------
+     * CLOSE MODAL
+     * ---------------------------------------------------------
+     */
+
+    window.closeFeedModal = function () {
+
+        if (!modal) {
+            return;
+        }
+
+        modal.classList.add("hidden");
+        modal.setAttribute("aria-hidden", "true");
+
+        document.body.classList.remove("overflow-hidden");
+
+    };
+
+
+    /*
+     * ---------------------------------------------------------
+     * SOURCE FIELD TOGGLE
+     * ---------------------------------------------------------
+     */
+
+    function toggleSourceFields() {
+
+        if (!sourceSelect) {
+            return;
+        }
+
+        const sourceValue = sourceSelect.value;
+
+
+        if (sourceValue === "URL") {
+
+            if (urlGroup) {
+                urlGroup.classList.remove("hidden");
+            }
+
+            if (fileGroup) {
+                fileGroup.classList.add("hidden");
+            }
+
+            if (fileInput) {
+                fileInput.required = false;
+            }
+
+        } else {
+
+            if (urlGroup) {
+                urlGroup.classList.add("hidden");
+            }
+
+            if (fileGroup) {
+                fileGroup.classList.remove("hidden");
+            }
+
+            if (fileInput) {
+                fileInput.required = true;
+            }
+
+        }
+
+    }
+
+
+    /*
+     * Listen for source changes
+     */
+
+    if (sourceSelect) {
+
+        sourceSelect.addEventListener(
+            "change",
+            toggleSourceFields
+        );
+
+    }
+
+
+    /*
+     * Initial state
+     */
+
+    toggleSourceFields();
+
+
+    /*
+     * ---------------------------------------------------------
+     * FILE NAME DISPLAY
+     * ---------------------------------------------------------
+     */
+
+    if (fileInput) {
+
+        fileInput.addEventListener(
+            "change",
+            function () {
+
+                if (
+                    fileInput.files &&
+                    fileInput.files.length > 0
+                ) {
+
+                    fileLabel.innerText =
+                        "Selected: " +
+                        fileInput.files[0].name;
+
+                } else {
+
+                    fileLabel.innerText =
+                        "Select CSV, TXT or JSON file";
+
+                }
+
+            }
+        );
+
+    }
+
+
+    /*
+     * ---------------------------------------------------------
+     * FORM SUBMIT PROTECTION
+     * ---------------------------------------------------------
+     *
+     * Prevent double-clicking Register & Process.
+     */
+
+    if (feedForm && submitButton) {
+
+        feedForm.addEventListener(
+            "submit",
+            function () {
+
+                submitButton.disabled = true;
+
+                submitButton.classList.add(
+                    "opacity-60",
+                    "cursor-not-allowed"
+                );
+
+                submitButton.innerHTML = `
+                    <span class="material-symbols-outlined text-sm animate-spin">
+                        sync
+                    </span>
+                    Processing...
+                `;
+
+            }
+        );
+
+    }
+
+
+    /*
+     * ---------------------------------------------------------
+     * CLOSE WHEN CLICKING OUTSIDE MODAL
+     * ---------------------------------------------------------
+     */
+
+    if (modal) {
+
+        modal.addEventListener(
+            "click",
+            function (event) {
+
+                if (event.target === modal) {
+                    closeFeedModal();
+                }
+
+            }
+        );
+
+    }
+
+
+    /*
+     * ---------------------------------------------------------
+     * ESC KEY CLOSE
+     * ---------------------------------------------------------
+     */
+
+    document.addEventListener(
+        "keydown",
+        function (event) {
+
+            if (
+                event.key === "Escape" &&
+                modal &&
+                !modal.classList.contains("hidden")
+            ) {
+
+                closeFeedModal();
+
+            }
+
+        }
+    );
+
+
+    /*
+     * ---------------------------------------------------------
+     * DELETE CONFIRMATION
+     * ---------------------------------------------------------
+     */
+
+    window.confirmDeleteFeed = function (feedName) {
+
+        return confirm(
+            "Are you sure you want to delete the feed \"" +
+            feedName +
+            "\"?\n\n" +
+            "This action cannot be undone."
+        );
+
+    };
+
+});
+
+</script>
+
+{% endblock %}

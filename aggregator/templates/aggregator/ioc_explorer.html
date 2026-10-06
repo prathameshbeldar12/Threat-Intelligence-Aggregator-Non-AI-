@@ -1,0 +1,271 @@
+{% extends 'aggregator/base.html' %}
+
+{% block title %}IOC Explorer{% endblock %}
+
+{% block content %}
+<!-- Header & Filters -->
+<div class="flex flex-col gap-6 mb-6">
+    <div>
+        <h2 class="font-headline-lg text-2xl font-bold text-primary-fixed">Threat Intelligence IOC Explorer</h2>
+        <p class="text-sm text-on-surface-variant">Perform search audits across aggregated indicators of compromise.</p>
+    </div>
+
+    <!-- Filter Form (Level 2 Glass Card) -->
+    <form method="GET" action="{% url 'ioc_explorer' %}" class="glass-panel p-4 rounded-xl grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 items-end">
+        <div class="flex flex-col gap-1.5 col-span-1 sm:col-span-2 md:col-span-2">
+            <label class="font-label-caps text-[10px] text-on-surface-variant uppercase tracking-wider">Search Value</label>
+            <input class="input-glass w-full px-3 py-1.5 rounded text-sm text-on-surface focus:outline-none" 
+                   type="text" name="q" value="{{ query }}" placeholder="Search IP, Domain, URL, Hash, Email...">
+        </div>
+
+        <div class="flex flex-col gap-1.5">
+            <label class="font-label-caps text-[10px] text-on-surface-variant uppercase tracking-wider">IOC Type</label>
+            <select name="type" class="input-glass w-full px-3 py-1.5 rounded text-sm bg-surface text-on-surface focus:outline-none">
+                <option value="">All Types</option>
+                <option value="IPv4" {% if ioc_type == 'IPv4' %}selected{% endif %}>IPv4 Address</option>
+                <option value="Domain" {% if ioc_type == 'Domain' %}selected{% endif %}>Domain Name</option>
+                <option value="URL" {% if ioc_type == 'URL' %}selected{% endif %}>URL Link</option>
+                <option value="Hash" {% if ioc_type == 'Hash' %}selected{% endif %}>Hex Hash</option>
+                <option value="Email" {% if ioc_type == 'Email' %}selected{% endif %}>Email Address</option>
+            </select>
+        </div>
+
+        <div class="flex flex-col gap-1.5">
+            <label class="font-label-caps text-[10px] text-on-surface-variant uppercase tracking-wider">Severity</label>
+            <select name="severity" class="input-glass w-full px-3 py-1.5 rounded text-sm bg-surface text-on-surface focus:outline-none">
+                <option value="">All Severities</option>
+                <option value="Low" {% if severity == 'Low' %}selected{% endif %}>Low</option>
+                <option value="Medium" {% if severity == 'Medium' %}selected{% endif %}>Medium</option>
+                <option value="High" {% if severity == 'High' %}selected{% endif %}>High</option>
+                <option value="Critical" {% if severity == 'Critical' %}selected{% endif %}>Critical</option>
+            </select>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 w-full">
+            <div class="flex flex-col gap-1.5">
+                <label class="font-label-caps text-[10px] text-on-surface-variant uppercase tracking-wider">Min Risk</label>
+                <input class="input-glass w-full px-3 py-1.5 rounded text-sm text-on-surface focus:outline-none" 
+                       type="number" name="min_risk" value="{{ min_risk }}" min="0" max="100" placeholder="0">
+            </div>
+            <button type="submit" class="btn-primary py-2 rounded font-label-caps text-[11px] font-bold uppercase tracking-wider flex items-center justify-center gap-1">
+                <span class="material-symbols-outlined text-[16px]">filter_alt</span>
+                Apply
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- Results Table -->
+<div class="glass-panel p-6 rounded-xl overflow-x-auto mb-6">
+    <table class="w-full text-left border-collapse">
+        <thead>
+            <tr class="font-label-caps text-[11px] text-on-surface-variant border-b border-outline-variant/30 pb-2">
+                <th class="py-2">Indicator Value</th>
+                <th class="py-2">Type</th>
+                <th class="py-2 text-center">Risk Score</th>
+                <th class="py-2 text-center">Severity</th>
+                <th class="py-2">Last Seen</th>
+                <th class="py-2 text-right">Details</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for ioc in page_obj %}
+            <tr class="data-table-row text-sm">
+                <td class="py-3 font-data-mono text-xs break-all max-w-xs md:max-w-md" title="{{ ioc.normalized_value }}">
+                    {{ ioc.normalized_value }}
+                </td>
+                <td class="py-3">
+                    <span class="px-2 py-0.5 rounded text-[11px] font-label-caps border border-outline-variant/40 bg-surface-container-high/40 text-on-surface-variant">
+                        {{ ioc.ioc_type }}
+                    </span>
+                </td>
+                <td class="py-3 text-center font-data-mono font-bold text-xs {% if ioc.risk_score >= 75 %}text-error{% elif ioc.risk_score >= 50 %}text-amber-500{% else %}text-primary-fixed{% endif %}">
+                    {{ ioc.risk_score }}
+                </td>
+                <td class="py-3 text-center">
+                    <span class="status-badge px-2.5 py-0.5 rounded-full text-[10px] font-label-caps
+                        {% if ioc.severity == 'Critical' %}
+                            border-red-500 text-red-400 bg-red-950/20
+                        {% elif ioc.severity == 'High' %}
+                            border-orange-500 text-orange-400 bg-orange-950/20
+                        {% elif ioc.severity == 'Medium' %}
+                            border-yellow-500 text-yellow-400 bg-yellow-950/20
+                        {% else %}
+                            border-green-500 text-green-400 bg-green-950/20
+                        {% endif %}">
+                        <span class="status-dot 
+                            {% if ioc.severity == 'Critical' %}bg-red-500
+                            {% elif ioc.severity == 'High' %}bg-orange-500
+                            {% elif ioc.severity == 'Medium' %}bg-yellow-500
+                            {% else %}bg-green-500{% endif %}"></span>
+                        {{ ioc.severity }}
+                    </span>
+                </td>
+                <td class="py-3 font-data-mono text-xs text-on-surface-variant">{{ ioc.last_seen|date:"Y-m-d H:i:s" }}</td>
+                <td class="py-3 text-right">
+                    <button onclick="openIocModal({{ ioc.id }})" class="px-2.5 py-1 rounded bg-surface-container hover:bg-surface-container-highest text-primary-fixed border border-outline-variant/30 text-xs font-label-caps flex items-center gap-1 transition-all">
+                        <span class="material-symbols-outlined text-[14px]">visibility</span>
+                        Inspect
+                    </button>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" class="py-12 text-center text-on-surface-variant text-sm font-label-caps">No indicators found matching filters.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Pagination controls -->
+    {% if page_obj.has_other_pages %}
+    <div class="flex justify-between items-center border-t border-outline-variant/20 pt-4 mt-4 font-label-caps text-xs">
+        <span class="text-on-surface-variant">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }} (Total: {{ page_obj.paginator.count }} IOCs)</span>
+        <div class="flex gap-2">
+            {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}&q={{ query }}&type={{ ioc_type }}&severity={{ severity }}&min_risk={{ min_risk }}" 
+               class="px-3 py-1.5 rounded btn-glass flex items-center gap-1">
+                <span class="material-symbols-outlined text-[14px]">arrow_back</span>
+                Prev
+            </a>
+            {% else %}
+            <span class="px-3 py-1.5 rounded border border-outline-variant/20 bg-surface-container/20 text-on-surface-variant/40 flex items-center gap-1 cursor-not-allowed">
+                <span class="material-symbols-outlined text-[14px]">arrow_back</span>
+                Prev
+            </span>
+            {% endif %}
+
+            {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}&q={{ query }}&type={{ ioc_type }}&severity={{ severity }}&min_risk={{ min_risk }}" 
+               class="px-3 py-1.5 rounded btn-glass flex items-center gap-1">
+                Next
+                <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+            </a>
+            {% else %}
+            <span class="px-3 py-1.5 rounded border border-outline-variant/20 bg-surface-container/20 text-on-surface-variant/40 flex items-center gap-1 cursor-not-allowed">
+                Next
+                <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+            </span>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Detail Modal -->
+<div id="iocDetailModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm hidden">
+    <div class="glass-panel rounded-xl max-w-2xl w-full mx-4 overflow-hidden border border-primary-fixed/30 shadow-2xl">
+        <div class="flex justify-between items-center p-6 border-b border-outline-variant/20 bg-surface-container-low/80">
+            <div>
+                <h3 class="font-display-lg text-lg font-bold text-primary-fixed flex items-center gap-2">
+                    <span class="material-symbols-outlined">lock_open</span>
+                    Indicator Analysis Detail
+                </h3>
+                <p class="text-xs text-on-surface-variant/70 mt-0.5">ThreatIntel Deterministic Scoring Reason Audit</p>
+            </div>
+            <button onclick="closeIocModal()" class="text-on-surface-variant hover:text-on-surface">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        <div class="p-6 flex flex-col gap-6 overflow-y-auto max-h-[70vh]">
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="font-label-caps text-[10px] text-on-surface-variant uppercase tracking-wider block mb-1">Raw Value</label>
+                    <div id="modalRawValue" class="font-data-mono text-sm bg-surface-container/60 p-2.5 rounded border border-outline-variant/20 break-all select-all"></div>
+                </div>
+                <div>
+                    <label class="font-label-caps text-[10px] text-on-surface-variant uppercase tracking-wider block mb-1">Normalized Value</label>
+                    <div id="modalNormValue" class="font-data-mono text-sm bg-surface-container/60 p-2.5 rounded border border-outline-variant/20 break-all select-all"></div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div>
+                    <label class="font-label-caps text-[10px] text-on-surface-variant uppercase block mb-1">IOC Type</label>
+                    <div id="modalType" class="font-data-mono text-xs font-bold text-on-surface bg-surface-container/30 px-3 py-1.5 rounded"></div>
+                </div>
+                <div>
+                    <label class="font-label-caps text-[10px] text-on-surface-variant uppercase block mb-1">Risk Score</label>
+                    <div id="modalRiskScore" class="font-data-mono text-xs font-bold text-on-surface bg-surface-container/30 px-3 py-1.5 rounded"></div>
+                </div>
+                <div>
+                    <label class="font-label-caps text-[10px] text-on-surface-variant uppercase block mb-1">Severity</label>
+                    <div id="modalSeverity" class="font-data-mono text-xs font-bold text-on-surface bg-surface-container/30 px-3 py-1.5 rounded"></div>
+                </div>
+                <div>
+                    <label class="font-label-caps text-[10px] text-on-surface-variant uppercase block mb-1">Status</label>
+                    <div id="modalStatus" class="font-data-mono text-xs font-bold text-on-surface bg-surface-container/30 px-3 py-1.5 rounded"></div>
+                </div>
+            </div>
+
+            <div>
+                <label class="font-label-caps text-[10px] text-on-surface-variant uppercase block mb-1">Deterministic Scoring Explanation</label>
+                <div id="modalScoringReason" class="text-sm bg-primary-fixed/5 border border-primary-fixed/20 p-3 rounded text-on-surface/90 leading-relaxed italic"></div>
+            </div>
+
+            <div>
+                <label class="font-label-caps text-[10px] text-on-surface-variant uppercase block mb-2">Source Feeds Overlaps</label>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs border-collapse">
+                        <thead>
+                            <tr class="font-label-caps border-b border-outline-variant/30 text-on-surface-variant">
+                                <th class="py-1">Feed Name</th>
+                                <th class="py-1">Category</th>
+                                <th class="py-1 text-center">Occurrences</th>
+                                <th class="py-1 text-right">Last Seen</th>
+                            </tr>
+                        </thead>
+                        <tbody id="modalSourcesTable">
+                            <!-- Injected dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="p-4 bg-surface-container-lowest/80 border-t border-outline-variant/20 flex justify-end">
+            <button onclick="closeIocModal()" class="btn-glass px-4 py-1.5 rounded font-label-caps text-xs">Close</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openIocModal(iocId) {
+        fetch(`/iocs/${iocId}/detail/`)
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('modalRawValue').innerText = data.value;
+                document.getElementById('modalNormValue').innerText = data.normalized_value;
+                document.getElementById('modalType').innerText = data.ioc_type;
+                document.getElementById('modalRiskScore').innerText = data.risk_score;
+                document.getElementById('modalSeverity').innerText = data.severity;
+                document.getElementById('modalStatus').innerText = data.status;
+                document.getElementById('modalScoringReason').innerText = data.reason;
+
+                // Build sources rows
+                const tbody = document.getElementById('modalSourcesTable');
+                tbody.innerHTML = '';
+                if(data.sources && data.sources.length > 0) {
+                    data.sources.forEach(src => {
+                        const tr = document.createElement('tr');
+                        tr.className = 'border-b border-outline-variant/10 hover:bg-surface-container/40';
+                        tr.innerHTML = `
+                            <td class="py-2 text-on-surface font-semibold">${src.feed_name}</td>
+                            <td class="py-2 text-on-surface-variant">${src.category}</td>
+                            <td class="py-2 text-center font-data-mono">${src.occurrence_count}</td>
+                            <td class="py-2 text-right text-on-surface-variant/70 font-data-mono">${src.last_seen}</td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="4" class="py-3 text-center text-on-surface-variant/40">No sources found.</td></tr>';
+                }
+
+                document.getElementById('iocDetailModal').classList.remove('hidden');
+            });
+    }
+
+    function closeIocModal() {
+        document.getElementById('iocDetailModal').classList.add('hidden');
+    }
+</script>
+{% endblock %}
